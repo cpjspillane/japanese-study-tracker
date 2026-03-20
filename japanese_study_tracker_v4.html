@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本語 Study Tracker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; padding: 1.5rem 1rem 3rem; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #e8e8e4; }
+    .card { background: #2a2a2a; border-color: rgba(255,255,255,0.1); }
+    .stat-bar { background: #222; }
+    .progress-bg { background: rgba(255,255,255,0.1); }
+    .pts-badge { background: #333; color: #aaa; }
+    .picker-panel { background: #222; }
+    .picker-option:hover { background: #2a2a2a; }
+    .add-row:hover, .activity-row:hover { background: rgba(255,255,255,0.05); }
+    .habit-row { background: #222; border-color: rgba(255,255,255,0.08); }
+    .entry-row { border-color: rgba(255,255,255,0.08); }
+    .picker-panel { border-color: rgba(255,255,255,0.08); }
+    .picker-option { border-color: rgba(255,255,255,0.08); }
+    .add-row { border-color: rgba(255,255,255,0.08); }
+    .reset-btn { border-color: rgba(255,255,255,0.2); color: #888; }
+    .reset-btn:hover { background: rgba(255,255,255,0.05); }
+    .goal-input { background: #2a2a2a; border-color: rgba(255,255,255,0.2); color: #e8e8e4; }
+    .section-label { color: #666; }
+    .activity-sub, .bar-label, .subtext, .habit-text, .goal-label, .add-label, .entry-name, .sub-pts { color: #888; }
+    .activity-name, .activity-name-plain { color: #e8e8e4; }
+    .picker-opt-name { color: #e8e8e4; }
+    .picker-opt-pts { color: #888; }
+  }
+  .tracker { max-width: 480px; margin: 0 auto; }
+  h2 { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+  .date-label { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+  .stat-bar { background: #ebebе6; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 8px; background: #eeeee9; }
+  .bar-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .bar-label { font-size: 13px; color: #777; }
+  .bar-pts { font-size: 22px; font-weight: 600; }
+  .bar-pts-sub { font-size: 14px; font-weight: 400; color: #777; }
+  .progress-bg { height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+  .fill-week { background: #1D9E75; }
+  .fill-week.hit { background: #639922; }
+  .fill-level { background: #534AB7; }
+  .subtext { font-size: 13px; color: #777; }
+  .subtext strong { font-weight: 600; color: #1a1a1a; }
+  @media (prefers-color-scheme: dark) { .subtext strong { color: #e8e8e4; } .bar-pts { color: #e8e8e4; } }
+  .section-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.07em; text-transform: uppercase; margin: 1.25rem 0 0.5rem; }
+  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  .activity-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; }
+  .activity-row:hover { background: #f9f9f6; }
+  .activity-name-plain { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .check.done { background: #1D9E75; border-color: #1D9E75; }
+  .check.done::after { content: ''; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px, -1px); display: block; }
+  .check-spacer { width: 20px; flex-shrink: 0; }
+  .activity-info { flex: 1; }
+  .activity-name { font-size: 14px; color: #1a1a1a; font-weight: 500; }
+  .activity-sub { font-size: 12px; color: #888; margin-top: 1px; }
+  .pts-badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: #f0f0eb; color: #888; white-space: nowrap; }
+  .pts-badge.earned { background: #e1f5ee; color: #0F6E56; }
+  .entry-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .entry-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; margin-left: 7px; }
+  .entry-name { font-size: 13px; color: #777; flex: 1; }
+  .entry-pts { font-size: 12px; color: #0F6E56; font-weight: 600; }
+  .entry-remove { font-size: 20px; color: #bbb; cursor: pointer; line-height: 1; padding: 0 2px; user-select: none; }
+  .entry-remove:hover { color: #555; }
+  .add-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; border-top: 0.5px solid rgba(0,0,0,0.08); user-select: none; }
+  .add-row:hover { background: #f9f9f6; }
+  .add-icon { width: 20px; height: 20px; border-radius: 50%; border: 1.5px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; color: #aaa; line-height: 1; }
+  .add-label { font-size: 13px; color: #888; flex: 1; }
+  .picker-panel { background: #f5f5f0; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .picker-option { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px 11px 20px; cursor: pointer; border-bottom: 0.5px solid rgba(0,0,0,0.07); user-select: none; }
+  .picker-option:last-child { border-bottom: none; }
+  .picker-option:hover { background: #fff; }
+  .picker-option.disabled { opacity: 0.35; pointer-events: none; }
+  .picker-opt-name { font-size: 13px; color: #1a1a1a; }
+  .picker-opt-pts { font-size: 12px; color: #888; }
+  .habit-row { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #f5f5f0; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .habit-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+  .habit-dot.active { background: #639922; }
+  .habit-text { font-size: 12px; color: #888; }
+  .goal-row { display: flex; align-items: center; gap: 10px; margin-top: 1rem; }
+  .goal-input { width: 72px; font-size: 14px; padding: 5px 8px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; text-align: center; }
+  .goal-label { font-size: 13px; color: #888; }
+  .reset-btn { margin-top: 1.25rem; width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #999; font-size: 13px; cursor: pointer; }
+  .reset-btn:hover { background: #f5f5f0; }
+</style>
+</head>
+<body>
+<div class="tracker">
+  <h2>日本語 study tracker</h2>
+  <div class="date-label" id="date-label"></div>
+
+  <div class="stat-bar">
+    <div class="bar-top">
+      <span class="bar-label">This week</span>
+      <span class="bar-pts"><span id="week-pts">0</span><span class="bar-pts-sub"> / <span id="goal-display">50</span> pts</span></span>
+    </div>
+    <div class="progress-bg"><div class="progress-fill fill-week" id="pw" style="width:0%"></div></div>
+    <div class="subtext">Today: <strong id="day-pts">0</strong> pts &nbsp;·&nbsp; Streak: <strong id="streak">0</strong> days</div>
+  </div>
+
+  <div class="stat-bar" style="margin-bottom:1.25rem">
+    <div class="bar-top">
+      <span id="level-title" style="font-size:16px;font-weight:600">外国人 Gaijin</span>
+      <span id="level-num" style="font-size:12px;color:#888">Level 0</span>
+    </div>
+    <div class="progress-bg"><div class="progress-fill fill-level" id="pl" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:4px">
+      <span class="subtext"><strong id="total-pts">0</strong> pts total</span>
+      <span class="subtext" id="level-next">next: 20 pts</span>
+    </div>
+  </div>
+
+  <div class="section-label">Daily checklist</div>
+
+  <div class="card">
+    <div class="activity-row" onclick="toggleSimple('anki')">
+      <div class="check" id="check-anki"></div>
+      <div class="activity-info">
+        <div class="activity-name">Anki flashcards</div>
+        <div class="activity-sub">Reviews + import new items to Renshuu</div>
+      </div>
+      <div class="pts-badge" id="badge-anki">+1 pt</div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-dot" id="habit-dot"></div>
+      <div class="habit-text" id="habit-text">Complete Anki to hit your minimum daily goal</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-tokini">
+    <div class="activity-name-plain">
+      <div class="check-spacer"></div>
+      <div class="activity-info">
+        <div class="activity-name">Tokini Andy / Genki content</div>
+        <div class="activity-sub" id="tokini-sublabel">cap: 8 pts/day</div>
+      </div>
+      <div class="pts-badge earned" id="tokini-total-badge" style="visibility:hidden">0 pts</div>
+    </div>
+    <div id="tokini-entries"></div>
+    <div class="add-row" id="tokini-add-row" onclick="togglePicker('tokini')">
+      <div class="add-icon">+</div>
+      <span class="add-label">Add activity</span>
+      <span class="pts-badge" id="tokini-rem-badge">up to +4 pts</span>
+    </div>
+    <div id="picker-tokini" style="display:none">
+      <div class="picker-panel">
+        <div class="picker-option" id="popt-tokini-video" onclick="addEntry('tokini','video',4,'Video or challenge')">
+          <span class="picker-opt-name">Video or challenge</span>
+          <span class="picker-opt-pts" id="ppts-tokini-video">4 pts</span>
+        </div>
+        <div class="picker-option" id="popt-tokini-workbook" onclick="addEntry('tokini','workbook',4,'Genki workbook exercises')">
+          <span class="picker-opt-name">Genki workbook exercises</span>
+          <span class="picker-opt-pts" id="ppts-tokini-workbook">4 pts</span>
+        </div>
+        <div class="picker-option" id="popt-tokini-kanji" onclick="addEntry('tokini','kanji',4,'Kanji reading video')">
+          <span class="picker-opt-name">Kanji reading video</span>
+          <span class="picker-opt-pts" id="ppts-tokini-kanji">4 pts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="activity-row" onclick="toggleSimple('renshuu')">
+      <div class="check" id="check-renshuu"></div>
+      <div class="activity-info">
+        <div class="activity-name">Renshuu quizzes</div>
+        <div class="activity-sub">Up to ~100 review terms</div>
+      </div>
+      <div class="pts-badge" id="badge-renshuu">+1 pt</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-media">
+    <div class="activity-name-plain">
+      <div class="check-spacer"></div>
+      <div class="activity-info">
+        <div class="activity-name">Immersion / media</div>
+        <div class="activity-sub" id="media-sublabel">cap: 10 pts/day</div>
+      </div>
+      <div class="pts-badge earned" id="media-total-badge" style="visibility:hidden">0 pts</div>
+    </div>
+    <div id="media-entries"></div>
+    <div class="add-row" id="media-add-row" onclick="togglePicker('media')">
+      <div class="add-icon">+</div>
+      <span class="add-label">Add activity</span>
+      <span class="pts-badge" id="media-rem-badge">up to +4 pts</span>
+    </div>
+    <div id="picker-media" style="display:none">
+      <div class="picker-panel">
+        <div class="picker-option" id="popt-media-jpsub" onclick="addEntry('media','jpsub',4,'JP audio + JP subtitles')">
+          <span class="picker-opt-name">JP audio + JP subtitles</span>
+          <span class="picker-opt-pts" id="ppts-media-jpsub">4 pts</span>
+        </div>
+        <div class="picker-option" id="popt-media-ensub" onclick="addEntry('media','ensub',2,'JP audio + EN subtitles')">
+          <span class="picker-opt-name">JP audio + EN subtitles</span>
+          <span class="picker-opt-pts" id="ppts-media-ensub">2 pts</span>
+        </div>
+        <div class="picker-option" id="popt-media-manga" onclick="addEntry('media','manga',3,'Manga')">
+          <span class="picker-opt-name">Manga</span>
+          <span class="picker-opt-pts" id="ppts-media-manga">3 pts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Weekly sessions</div>
+
+  <div class="card">
+    <div class="activity-row" onclick="toggleSimple('crash')">
+      <div class="check" id="check-crash"></div>
+      <div class="activity-info">
+        <div class="activity-name">Weekly crash session</div>
+        <div class="activity-sub">1 hour focused Genki prep + bonus</div>
+      </div>
+      <div class="pts-badge" id="badge-crash">+7 pts</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="activity-row" onclick="toggleSimple('preply')">
+      <div class="check" id="check-preply"></div>
+      <div class="activity-info">
+        <div class="activity-name">Preply session with Yuu-san</div>
+        <div class="activity-sub">Weekly lesson</div>
+      </div>
+      <div class="pts-badge" id="badge-preply">+3 pts</div>
+    </div>
+  </div>
+
+  <div class="goal-row">
+    <span class="goal-label">Weekly stretch goal:</span>
+    <input type="number" class="goal-input" id="goal-input" value="50" min="10" max="150" onchange="updateGoal()">
+    <span class="goal-label">pts</span>
+  </div>
+
+  <button class="reset-btn" onclick="resetDay()">Reset today's checklist</button>
+</div>
+
+<script>
+const LEVELS=[
+  {title:'外国人 Gaijin',pts:0},{title:'観光客 Tourist',pts:20},{title:'学生 Student',pts:50},
+  {title:'旅人 Traveler',pts:140},{title:'話し手 Speaker',pts:330},{title:'常連 Regular',pts:720},
+  {title:'居住者 Resident',pts:1400},{title:'友人 Friend',pts:2500},{title:'市民 Citizen',pts:4200},
+  {title:'達人 Master',pts:6700},{title:'日本人 Japanese',pts:10000}
+];
+const BASE={anki:1,renshuu:1,crash:7,preply:3};
+const CAPS={tokini:8,media:10};
+const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:2,manga:3}};
+
+function today(){return new Date().toISOString().slice(0,10);}
+function weekKey(){const d=new Date(),s=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
+function blank(){return{checked:{},entries:{tokini:[],media:[]},dayPts:0,weekPts:0,totalPts:0,streak:0,lastDay:null,lastWeek:null,goal:50};}
+
+let state=(()=>{
+  try{
+    const raw=localStorage.getItem('jp_v5');
+    if(!raw)return blank();
+    const s={...blank(),...JSON.parse(raw)};
+    if(s.lastWeek!==weekKey()){s.weekPts=0;s.lastWeek=weekKey();}
+    if(s.lastDay!==today()){s.checked={};s.entries={tokini:[],media:[]};s.dayPts=0;s.lastDay=today();}
+    if(!s.entries)s.entries={tokini:[],media:[]};
+    return s;
+  }catch(e){return blank();}
+})();
+
+function save(){try{localStorage.setItem('jp_v5',JSON.stringify(state));}catch(e){}}
+function entrySum(key){return(state.entries[key]||[]).reduce((t,e)=>t+e.pts,0);}
+function addPts(n){state.dayPts+=n;state.weekPts+=n;state.totalPts+=n;}
+
+function toggleSimple(key){
+  const was=state.checked[key];
+  if(was){state.checked[key]=false;addPts(-BASE[key]);}
+  else{state.checked[key]=true;addPts(BASE[key]);}
+  save();render();
+}
+
+function togglePicker(key){
+  const el=document.getElementById('picker-'+key);
+  const isOpen=el.style.display!=='none';
+  document.getElementById('picker-tokini').style.display='none';
+  document.getElementById('picker-media').style.display='none';
+  if(!isOpen)el.style.display='block';
+}
+
+function addEntry(key,type,basePts,label){
+  const remaining=CAPS[key]-entrySum(key);
+  if(remaining<=0)return;
+  const actual=Math.min(basePts,remaining);
+  state.entries[key].push({type,label,pts:actual});
+  addPts(actual);
+  document.getElementById('picker-'+key).style.display='none';
+  save();render();
+}
+
+function removeEntry(key,idx){
+  addPts(-state.entries[key][idx].pts);
+  state.entries[key].splice(idx,1);
+  save();render();
+}
+
+function updateGoal(){
+  const v=parseInt(document.getElementById('goal-input').value);
+  if(!isNaN(v)&&v>=10){state.goal=v;save();render();}
+}
+
+function resetDay(){
+  addPts(-state.dayPts);
+  state.checked={};state.entries={tokini:[],media:[]};state.dayPts=0;
+  save();render();
+}
+
+function getLvl(tp){for(let i=LEVELS.length-1;i>=0;i--){if(tp>=LEVELS[i].pts)return i;}return 0;}
+
+function render(){
+  const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d=new Date();
+  document.getElementById('date-label').textContent=DAYS[d.getDay()]+', '+MONTHS[d.getMonth()]+' '+d.getDate();
+
+  const wp=Math.max(0,state.weekPts),dp=Math.max(0,state.dayPts),tp=Math.max(0,state.totalPts);
+  document.getElementById('week-pts').textContent=wp;
+  document.getElementById('day-pts').textContent=dp;
+  document.getElementById('streak').textContent=state.streak;
+  document.getElementById('goal-display').textContent=state.goal;
+  document.getElementById('goal-input').value=state.goal;
+  document.getElementById('total-pts').textContent=tp;
+
+  const pw=document.getElementById('pw');
+  pw.style.width=Math.min(100,Math.round(wp/state.goal*100))+'%';
+  pw.className='progress-fill fill-week'+(wp>=state.goal?' hit':'');
+
+  const lvl=getLvl(tp),isMax=lvl>=LEVELS.length-1;
+  const cur=LEVELS[lvl].pts,nxt=isMax?cur:LEVELS[lvl+1].pts;
+  document.getElementById('level-title').textContent=LEVELS[lvl].title;
+  document.getElementById('level-num').textContent='Level '+lvl;
+  document.getElementById('pl').style.width=(isMax?100:Math.min(100,Math.round((tp-cur)/(nxt-cur)*100)))+'%';
+  document.getElementById('level-next').textContent=isMax?'max level':'next: '+nxt+' pts';
+
+  ['anki','renshuu','crash','preply'].forEach(k=>{
+    const done=state.checked[k];
+    document.getElementById('check-'+k).className='check'+(done?' done':'');
+    document.getElementById('badge-'+k).className='pts-badge'+(done?' earned':'');
+  });
+
+  document.getElementById('habit-dot').className='habit-dot'+(state.checked.anki?' active':'');
+  document.getElementById('habit-text').textContent=state.checked.anki?'Minimum daily goal reached':'Complete Anki to hit your minimum daily goal';
+
+  ['tokini','media'].forEach(key=>{
+    const cap=CAPS[key],entries=state.entries[key]||[],spent=entrySum(key),remaining=cap-spent;
+    const opts=OPT_PTS[key];
+    const container=document.getElementById(key+'-entries');
+    container.innerHTML='';
+    entries.forEach((e,i)=>{
+      const row=document.createElement('div');
+      row.className='entry-row';
+      row.innerHTML='<div class="entry-dot"></div><span class="entry-name">'+e.label+'</span><span class="entry-pts">+'+e.pts+' pts</span><span class="entry-remove" onclick="removeEntry(\''+key+'\','+i+')">×</span>';
+      container.appendChild(row);
+    });
+    const tb=document.getElementById(key+'-total-badge');
+    tb.style.visibility=spent>0?'visible':'hidden';
+    tb.textContent=spent+' pts';
+    const addRow=document.getElementById(key+'-add-row');
+    const remBadge=document.getElementById(key+'-rem-badge');
+    if(remaining<=0){
+      addRow.style.display='none';
+      document.getElementById('picker-'+key).style.display='none';
+      document.getElementById(key+'-sublabel').textContent='cap reached ('+cap+' pts)';
+    } else {
+      addRow.style.display='flex';
+      remBadge.textContent='up to +'+Math.min(Math.max(...Object.values(opts)),remaining)+' pts';
+      document.getElementById(key+'-sublabel').textContent='cap: '+cap+' pts/day';
+    }
+    Object.entries(opts).forEach(([id,bp])=>{
+      const el=document.getElementById('popt-'+key+'-'+id);
+      const pe=document.getElementById('ppts-'+key+'-'+id);
+      if(!el)return;
+      const actual=Math.min(bp,remaining);
+      el.className='picker-option'+(remaining<=0||actual<=0?' disabled':'');
+      if(pe)pe.textContent=actual<=0?'0 pts':actual+(actual<bp?' pts (capped)':' pts');
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>

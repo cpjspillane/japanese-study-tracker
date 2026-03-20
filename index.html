@@ -1,90 +1,122 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本語 Study Tracker</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-.tracker { padding: 1rem 0; max-width: 480px; margin: 0 auto; }
-.header { margin-bottom: 1.5rem; }
-.header h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
-.header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
-.stat-bar { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 8px; }
-.bar-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
-.bar-label { font-size: 13px; color: var(--color-text-secondary); }
-.bar-pts { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
-.progress-track { height: 6px; background: var(--color-border-tertiary); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
-.progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
-.fill-week { background: #1D9E75; }
-.fill-week.hit { background: #639922; }
-.fill-level { background: #534AB7; }
-.subtext { font-size: 13px; color: var(--color-text-secondary); }
-.section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; margin: 1.25rem 0 0.5rem; }
-.activity-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 8px; overflow: hidden; }
-.activity-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; }
-.activity-row:hover { background: var(--color-background-secondary); }
-.check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--color-border-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
-.check.done { background: #1D9E75; border-color: #1D9E75; }
-.check.done::after { content: ''; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px, -1px); display: block; }
-.activity-info { flex: 1; }
-.activity-name { font-size: 14px; color: var(--color-text-primary); }
-.activity-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 1px; }
-.pts-badge { font-size: 12px; font-weight: 500; padding: 3px 8px; border-radius: 20px; background: var(--color-background-secondary); color: var(--color-text-secondary); white-space: nowrap; }
-.pts-badge.earned { background: #E1F5EE; color: #0F6E56; }
-.entry-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 0.5px solid var(--color-border-tertiary); }
-.entry-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; margin-left: 7px; }
-.entry-name { font-size: 13px; color: var(--color-text-secondary); flex: 1; }
-.entry-pts { font-size: 12px; color: #0F6E56; font-weight: 500; }
-.entry-remove { font-size: 18px; color: var(--color-text-tertiary); cursor: pointer; line-height: 1; padding: 0 2px; user-select: none; }
-.entry-remove:hover { color: var(--color-text-primary); }
-.add-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; border-top: 0.5px solid var(--color-border-tertiary); user-select: none; }
-.add-row:hover { background: var(--color-background-secondary); }
-.add-icon { width: 20px; height: 20px; border-radius: 50%; border: 1.5px dashed var(--color-border-secondary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; color: var(--color-text-tertiary); line-height: 1; }
-.add-label { font-size: 13px; color: var(--color-text-secondary); flex: 1; }
-.picker-panel { border-top: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
-.picker-option { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px 11px 20px; cursor: pointer; border-bottom: 0.5px solid var(--color-border-tertiary); user-select: none; }
-.picker-option:last-child { border-bottom: none; }
-.picker-option:hover { background: var(--color-background-primary); }
-.picker-option.disabled { opacity: 0.38; pointer-events: none; }
-.picker-opt-name { font-size: 13px; color: var(--color-text-primary); }
-.picker-opt-pts { font-size: 12px; color: var(--color-text-secondary); }
-.habit-row { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--color-background-secondary); border-top: 0.5px solid var(--color-border-tertiary); }
-.habit-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-border-secondary); flex-shrink: 0; }
-.habit-dot.active { background: #639922; }
-.habit-text { font-size: 12px; color: var(--color-text-secondary); }
-.goal-row { display: flex; align-items: center; gap: 10px; margin-top: 1rem; }
-.goal-input { width: 70px; font-size: 14px; padding: 4px 8px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); text-align: center; }
-.goal-label { font-size: 13px; color: var(--color-text-secondary); }
-.reset-btn { margin-top: 1.25rem; width: 100%; padding: 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; }
-.reset-btn:hover { background: var(--color-background-secondary); }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; padding: 1.5rem 1rem 3rem; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #e8e8e4; }
+    .card { background: #2a2a2a; border-color: rgba(255,255,255,0.1); }
+    .stat-bar { background: #222; }
+    .progress-bg { background: rgba(24, 17, 17, 0.1); }
+    .pts-badge { background: #333; color: #aaa; }
+    .picker-panel { background: #222; }
+    .picker-option:hover { background: #2a2a2a; }
+    .add-row:hover, .activity-row:hover { background: rgba(255,255,255,0.05); }
+    .habit-row { background: #222; border-color: rgba(255,255,255,0.08); }
+    .entry-row { border-color: rgba(255,255,255,0.08); }
+    .picker-panel { border-color: rgba(255,255,255,0.08); }
+    .picker-option { border-color: rgba(255,255,255,0.08); }
+    .add-row { border-color: rgba(255,255,255,0.08); }
+    .reset-btn { border-color: rgba(255,255,255,0.2); color: #888; }
+    .reset-btn:hover { background: rgba(255,255,255,0.05); }
+    .goal-input { background: #2a2a2a; border-color: rgba(255,255,255,0.2); color: #e8e8e4; }
+    .section-label { color: #666; }
+    .activity-sub, .bar-label, .subtext, .habit-text, .goal-label, .add-label, .entry-name, .sub-pts { color: #888; }
+    .activity-name, .activity-name-plain { color: #e8e8e4; }
+    .picker-opt-name { color: #e8e8e4; }
+    .picker-opt-pts { color: #888; }
+  }
+  .tracker { max-width: 480px; margin: 0 auto; }
+  h2 { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
+  .date-label { font-size: 13px; color: #888; margin-bottom: 1.5rem; }
+  .stat-bar { background: #ebebе6; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 8px; background: #eeeee9; }
+  .bar-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .bar-label { font-size: 13px; color: #777; }
+  .bar-pts { font-size: 22px; font-weight: 600; }
+  .bar-pts-sub { font-size: 14px; font-weight: 400; color: #777; }
+  .progress-bg { height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s ease; }
+  .fill-week { background: #1D9E75; }
+  .fill-week.hit { background: #639922; }
+  .fill-level { background: #534AB7; }
+  .subtext { font-size: 13px; color: #777; }
+  .subtext strong { font-weight: 600; color: #1a1a1a; }
+  @media (prefers-color-scheme: dark) { .subtext strong { color: #e8e8e4; } .bar-pts { color: #e8e8e4; } }
+  .section-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.07em; text-transform: uppercase; margin: 1.25rem 0 0.5rem; }
+  .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+  .activity-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; }
+  .activity-row:hover { background: #f9f9f6; }
+  .activity-name-plain { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+  .check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .check.done { background: #1D9E75; border-color: #1D9E75; }
+  .check.done::after { content: ''; width: 6px; height: 10px; border: 2px solid white; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px, -1px); display: block; }
+  .check-spacer { width: 20px; flex-shrink: 0; }
+  .activity-info { flex: 1; }
+  .activity-name { font-size: 14px; color: #1a1a1a; font-weight: 500; }
+  .activity-sub { font-size: 12px; color: #888; margin-top: 1px; }
+  .pts-badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: #f0f0eb; color: #888; white-space: nowrap; }
+  .pts-badge.earned { background: #e1f5ee; color: #0F6E56; }
+  .entry-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .entry-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; margin-left: 7px; }
+  .entry-name { font-size: 13px; color: #777; flex: 1; }
+  .entry-pts { font-size: 12px; color: #0F6E56; font-weight: 600; }
+  .entry-remove { font-size: 20px; color: #bbb; cursor: pointer; line-height: 1; padding: 0 2px; user-select: none; }
+  .entry-remove:hover { color: #555; }
+  .add-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; border-top: 0.5px solid rgba(0,0,0,0.08); user-select: none; }
+  .add-row:hover { background: #f9f9f6; }
+  .add-icon { width: 20px; height: 20px; border-radius: 50%; border: 1.5px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; color: #aaa; line-height: 1; }
+  .add-label { font-size: 13px; color: #888; flex: 1; }
+  .picker-panel { background: #f5f5f0; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .picker-option { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px 11px 20px; cursor: pointer; border-bottom: 0.5px solid rgba(0,0,0,0.07); user-select: none; }
+  .picker-option:last-child { border-bottom: none; }
+  .picker-option:hover { background: #fff; }
+  .picker-option.disabled { opacity: 0.35; pointer-events: none; }
+  .picker-opt-name { font-size: 13px; color: #1a1a1a; }
+  .picker-opt-pts { font-size: 12px; color: #888; }
+  .habit-row { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #f5f5f0; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .habit-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+  .habit-dot.active { background: #639922; }
+  .habit-text { font-size: 12px; color: #888; }
+  .goal-row { display: flex; align-items: center; gap: 10px; margin-top: 1rem; }
+  .goal-input { width: 72px; font-size: 14px; padding: 5px 8px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; text-align: center; }
+  .goal-label { font-size: 13px; color: #888; }
+  .reset-btn { margin-top: 1.25rem; width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #999; font-size: 13px; cursor: pointer; }
+  .reset-btn:hover { background: #f5f5f0; }
 </style>
-
+</head>
+<body>
 <div class="tracker">
-  <div class="header">
-    <h2>日本語 study tracker</h2>
-    <p id="date-label"></p>
-  </div>
+  <h2>日本語 study tracker</h2>
+  <div class="date-label" id="date-label"></div>
 
   <div class="stat-bar">
     <div class="bar-top">
       <span class="bar-label">This week</span>
-      <span class="bar-pts"><span id="week-pts">0</span><span style="font-size:14px;font-weight:400;color:var(--color-text-secondary)"> / <span id="goal-display">50</span> pts</span></span>
+      <span class="bar-pts"><span id="week-pts">0</span><span class="bar-pts-sub"> / <span id="goal-display">50</span> pts</span></span>
     </div>
-    <div class="progress-track"><div class="progress-fill fill-week" id="pw" style="width:0%"></div></div>
-    <div class="subtext">Today: <span id="day-pts" style="font-weight:500;color:var(--color-text-primary)">0</span> pts &nbsp;·&nbsp; Streak: <span id="streak" style="font-weight:500;color:var(--color-text-primary)">0</span> days</div>
+    <div class="progress-bg"><div class="progress-fill fill-week" id="pw" style="width:0%"></div></div>
+    <div class="subtext">Today: <strong id="day-pts">0</strong> pts &nbsp;·&nbsp; Streak: <strong id="streak">0</strong> days</div>
   </div>
 
   <div class="stat-bar" style="margin-bottom:1.25rem">
     <div class="bar-top">
-      <span id="level-title" style="font-size:16px;font-weight:500;color:var(--color-text-primary)">外国人 Gaijin</span>
-      <span id="level-num" style="font-size:12px;color:var(--color-text-secondary)">Level 0</span>
+      <span id="level-title" style="font-size:16px;font-weight:600">外国人 Gaijin</span>
+      <span id="level-num" style="font-size:12px;color:#888">Level 0</span>
     </div>
-    <div class="progress-track"><div class="progress-fill fill-level" id="pl" style="width:0%"></div></div>
+    <div class="progress-bg"><div class="progress-fill fill-level" id="pl" style="width:0%"></div></div>
     <div style="display:flex;justify-content:space-between;margin-top:4px">
-      <span class="subtext"><span id="total-pts" style="font-weight:500;color:var(--color-text-primary)">0</span> pts total</span>
+      <span class="subtext"><strong id="total-pts">0</strong> pts total</span>
       <span class="subtext" id="level-next">next: 20 pts</span>
     </div>
   </div>
 
   <div class="section-label">Daily checklist</div>
 
-  <div class="activity-card">
+  <div class="card">
     <div class="activity-row" onclick="toggleSimple('anki')">
       <div class="check" id="check-anki"></div>
       <div class="activity-info">
@@ -99,14 +131,14 @@
     </div>
   </div>
 
-  <div class="activity-card" id="card-tokini">
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
-      <div style="width:20px;flex-shrink:0"></div>
+  <div class="card" id="card-tokini">
+    <div class="activity-name-plain">
+      <div class="check-spacer"></div>
       <div class="activity-info">
         <div class="activity-name">Tokini Andy / Genki content</div>
         <div class="activity-sub" id="tokini-sublabel">cap: 8 pts/day</div>
       </div>
-      <div class="pts-badge" id="tokini-total-badge" style="visibility:hidden">0 pts</div>
+      <div class="pts-badge earned" id="tokini-total-badge" style="visibility:hidden">0 pts</div>
     </div>
     <div id="tokini-entries"></div>
     <div class="add-row" id="tokini-add-row" onclick="togglePicker('tokini')">
@@ -132,7 +164,7 @@
     </div>
   </div>
 
-  <div class="activity-card">
+  <div class="card">
     <div class="activity-row" onclick="toggleSimple('renshuu')">
       <div class="check" id="check-renshuu"></div>
       <div class="activity-info">
@@ -143,14 +175,14 @@
     </div>
   </div>
 
-  <div class="activity-card" id="card-media">
-    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
-      <div style="width:20px;flex-shrink:0"></div>
+  <div class="card" id="card-media">
+    <div class="activity-name-plain">
+      <div class="check-spacer"></div>
       <div class="activity-info">
         <div class="activity-name">Immersion / media</div>
         <div class="activity-sub" id="media-sublabel">cap: 10 pts/day</div>
       </div>
-      <div class="pts-badge" id="media-total-badge" style="visibility:hidden">0 pts</div>
+      <div class="pts-badge earned" id="media-total-badge" style="visibility:hidden">0 pts</div>
     </div>
     <div id="media-entries"></div>
     <div class="add-row" id="media-add-row" onclick="togglePicker('media')">
@@ -178,7 +210,7 @@
 
   <div class="section-label">Weekly sessions</div>
 
-  <div class="activity-card">
+  <div class="card">
     <div class="activity-row" onclick="toggleSimple('crash')">
       <div class="check" id="check-crash"></div>
       <div class="activity-info">
@@ -189,7 +221,7 @@
     </div>
   </div>
 
-  <div class="activity-card">
+  <div class="card">
     <div class="activity-row" onclick="toggleSimple('preply')">
       <div class="check" id="check-preply"></div>
       <div class="activity-info">
@@ -222,7 +254,6 @@ const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:2,manga:
 
 function today(){return new Date().toISOString().slice(0,10);}
 function weekKey(){const d=new Date(),s=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
-
 function blank(){return{checked:{},entries:{tokini:[],media:[]},dayPts:0,weekPts:0,totalPts:0,streak:0,lastDay:null,lastWeek:null,goal:50};}
 
 let state=(()=>{
@@ -238,16 +269,13 @@ let state=(()=>{
 })();
 
 function save(){try{localStorage.setItem('jp_v5',JSON.stringify(state));}catch(e){}}
-
 function entrySum(key){return(state.entries[key]||[]).reduce((t,e)=>t+e.pts,0);}
-
 function addPts(n){state.dayPts+=n;state.weekPts+=n;state.totalPts+=n;}
 
 function toggleSimple(key){
   const was=state.checked[key];
-  const pts=BASE[key];
-  if(was){state.checked[key]=false;addPts(-pts);}
-  else{state.checked[key]=true;addPts(pts);}
+  if(was){state.checked[key]=false;addPts(-BASE[key]);}
+  else{state.checked[key]=true;addPts(BASE[key]);}
   save();render();
 }
 
@@ -260,9 +288,7 @@ function togglePicker(key){
 }
 
 function addEntry(key,type,basePts,label){
-  const cap=CAPS[key];
-  const spent=entrySum(key);
-  const remaining=cap-spent;
+  const remaining=CAPS[key]-entrySum(key);
   if(remaining<=0)return;
   const actual=Math.min(basePts,remaining);
   state.entries[key].push({type,label,pts:actual});
@@ -272,9 +298,8 @@ function addEntry(key,type,basePts,label){
 }
 
 function removeEntry(key,idx){
-  const pts=state.entries[key][idx].pts;
+  addPts(-state.entries[key][idx].pts);
   state.entries[key].splice(idx,1);
-  addPts(-pts);
   save();render();
 }
 
@@ -289,10 +314,7 @@ function resetDay(){
   save();render();
 }
 
-function getLvl(total){
-  for(let i=LEVELS.length-1;i>=0;i--){if(total>=LEVELS[i].pts)return i;}
-  return 0;
-}
+function getLvl(tp){for(let i=LEVELS.length-1;i>=0;i--){if(tp>=LEVELS[i].pts)return i;}return 0;}
 
 function render(){
   const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -308,17 +330,15 @@ function render(){
   document.getElementById('goal-input').value=state.goal;
   document.getElementById('total-pts').textContent=tp;
 
-  const wpct=Math.min(100,Math.round(wp/state.goal*100));
   const pw=document.getElementById('pw');
-  pw.style.width=wpct+'%';
+  pw.style.width=Math.min(100,Math.round(wp/state.goal*100))+'%';
   pw.className='progress-fill fill-week'+(wp>=state.goal?' hit':'');
 
   const lvl=getLvl(tp),isMax=lvl>=LEVELS.length-1;
   const cur=LEVELS[lvl].pts,nxt=isMax?cur:LEVELS[lvl+1].pts;
-  const lpct=isMax?100:Math.min(100,Math.round((tp-cur)/(nxt-cur)*100));
   document.getElementById('level-title').textContent=LEVELS[lvl].title;
   document.getElementById('level-num').textContent='Level '+lvl;
-  document.getElementById('pl').style.width=lpct+'%';
+  document.getElementById('pl').style.width=(isMax?100:Math.min(100,Math.round((tp-cur)/(nxt-cur)*100)))+'%';
   document.getElementById('level-next').textContent=isMax?'max level':'next: '+nxt+' pts';
 
   ['anki','renshuu','crash','preply'].forEach(k=>{
@@ -327,17 +347,12 @@ function render(){
     document.getElementById('badge-'+k).className='pts-badge'+(done?' earned':'');
   });
 
-  const ankiDone=state.checked.anki;
-  document.getElementById('habit-dot').className='habit-dot'+(ankiDone?' active':'');
-  document.getElementById('habit-text').textContent=ankiDone?'Minimum daily goal reached':'Complete Anki to hit your minimum daily goal';
+  document.getElementById('habit-dot').className='habit-dot'+(state.checked.anki?' active':'');
+  document.getElementById('habit-text').textContent=state.checked.anki?'Minimum daily goal reached':'Complete Anki to hit your minimum daily goal';
 
   ['tokini','media'].forEach(key=>{
-    const cap=CAPS[key];
-    const entries=state.entries[key]||[];
-    const spent=entrySum(key);
-    const remaining=cap-spent;
+    const cap=CAPS[key],entries=state.entries[key]||[],spent=entrySum(key),remaining=cap-spent;
     const opts=OPT_PTS[key];
-
     const container=document.getElementById(key+'-entries');
     container.innerHTML='';
     entries.forEach((e,i)=>{
@@ -346,43 +361,32 @@ function render(){
       row.innerHTML='<div class="entry-dot"></div><span class="entry-name">'+e.label+'</span><span class="entry-pts">+'+e.pts+' pts</span><span class="entry-remove" onclick="removeEntry(\''+key+'\','+i+')">×</span>';
       container.appendChild(row);
     });
-
-    const totalBadge=document.getElementById(key+'-total-badge');
-    totalBadge.style.visibility=spent>0?'visible':'hidden';
-    totalBadge.textContent=spent+' pts';
-    totalBadge.className='pts-badge'+(spent>0?' earned':'');
-
+    const tb=document.getElementById(key+'-total-badge');
+    tb.style.visibility=spent>0?'visible':'hidden';
+    tb.textContent=spent+' pts';
     const addRow=document.getElementById(key+'-add-row');
     const remBadge=document.getElementById(key+'-rem-badge');
-    const sublabel=document.getElementById(key+'-sublabel');
-
     if(remaining<=0){
       addRow.style.display='none';
       document.getElementById('picker-'+key).style.display='none';
-      sublabel.textContent='cap reached ('+cap+' pts)';
+      document.getElementById(key+'-sublabel').textContent='cap reached ('+cap+' pts)';
     } else {
       addRow.style.display='flex';
-      const maxOpt=Math.max(...Object.values(opts));
-      const cappedMax=Math.min(maxOpt,remaining);
-      remBadge.textContent='up to +'+cappedMax+' pts';
-      sublabel.textContent='cap: '+cap+' pts/day';
+      remBadge.textContent='up to +'+Math.min(Math.max(...Object.values(opts)),remaining)+' pts';
+      document.getElementById(key+'-sublabel').textContent='cap: '+cap+' pts/day';
     }
-
-    Object.entries(opts).forEach(([id,basePts])=>{
+    Object.entries(opts).forEach(([id,bp])=>{
       const el=document.getElementById('popt-'+key+'-'+id);
-      const ptsEl=document.getElementById('ppts-'+key+'-'+id);
+      const pe=document.getElementById('ppts-'+key+'-'+id);
       if(!el)return;
-      const actual=Math.min(basePts,remaining);
-      if(remaining<=0||actual<=0){
-        el.className='picker-option disabled';
-        if(ptsEl)ptsEl.textContent='0 pts';
-      } else {
-        el.className='picker-option';
-        if(ptsEl)ptsEl.textContent=actual+(actual<basePts?' pts (capped)':' pts');
-      }
+      const actual=Math.min(bp,remaining);
+      el.className='picker-option'+(remaining<=0||actual<=0?' disabled':'');
+      if(pe)pe.textContent=actual<=0?'0 pts':actual+(actual<bp?' pts (capped)':' pts');
     });
   });
 }
 
 render();
 </script>
+</body>
+</html>

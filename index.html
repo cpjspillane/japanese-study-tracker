@@ -13,19 +13,25 @@
     .stat-bar { background: #222; }
     .progress-bg { background: rgba(255,255,255,0.1); }
     .pts-badge { background: #333; color: #aaa; }
-    .picker-panel { background: #222; }
+    .pts-badge.earned { background: rgba(29,158,117,0.15); color: #3dbf8f; }
+    .picker-panel { background: #222; border-color: rgba(255,255,255,0.08); }
     .picker-option:hover { background: #2a2a2a; }
+    .picker-option { border-color: rgba(255,255,255,0.08); }
     .add-row:hover, .activity-row:hover { background: rgba(255,255,255,0.05); }
+    .add-row { border-color: rgba(255,255,255,0.08); }
     .habit-row { background: #222; border-color: rgba(255,255,255,0.08); }
     .entry-row { border-color: rgba(255,255,255,0.08); }
-    .picker-panel { border-color: rgba(255,255,255,0.08); }
-    .picker-option { border-color: rgba(255,255,255,0.08); }
-    .add-row { border-color: rgba(255,255,255,0.08); }
+    .entry-pts { color: #3dbf8f; }
+    .entry-remove { color: #555; }
+    .entry-remove:hover { color: #aaa; }
     .reset-btn { border-color: rgba(255,255,255,0.2); color: #888; }
     .reset-btn:hover { background: rgba(255,255,255,0.05); }
     .goal-input { background: #2a2a2a; border-color: rgba(255,255,255,0.2); color: #e8e8e4; }
     .section-label { color: #666; }
     .activity-sub, .bar-label, .subtext, .habit-text, .goal-label, .add-label, .entry-name { color: #888; }
+    .bar-pts { color: #e8e8e4; }
+    .bar-pts-sub { color: #888; }
+    .subtext strong { color: #e8e8e4; }
     .activity-name { color: #e8e8e4; }
     .picker-opt-name { color: #e8e8e4; }
     .picker-opt-pts { color: #888; }
@@ -55,7 +61,6 @@
   .fill-level { background: #534AB7; }
   .subtext { font-size: 13px; color: #777; }
   .subtext strong { font-weight: 600; color: #1a1a1a; }
-  @media (prefers-color-scheme: dark) { .subtext strong { color: #e8e8e4; } .bar-pts { color: #e8e8e4; } }
   .section-label { font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.07em; text-transform: uppercase; margin: 1.25rem 0 0.5rem; }
   .card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
   .activity-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; user-select: none; }
@@ -284,7 +289,7 @@ const BASE={anki:1,renshuu:1,crash:7,preply:3};
 const CAPS={tokini:8,media:10};
 const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:2,manga:3}};
 
-function today(){return new Date().toISOString().slice(0,10);}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function weekKey(){const d=new Date(),s=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
 function blank(){return{checked:{},entries:{tokini:[],media:[]},dayPts:0,weekPts:0,totalPts:0,streak:0,lastDay:null,lastWeek:null,goal:50};}
 
@@ -310,11 +315,13 @@ function scheduleSave() {
 }
 
 function freshState(s) {
-  if (s.lastWeek !== weekKey()) { s.weekPts = 0; s.lastWeek = weekKey(); }
-  if (s.lastDay !== today()) { s.checked = {}; s.entries = {tokini:[],media:[]}; s.dayPts = 0; s.lastDay = today(); }
+  let changed = false;
+  if (s.lastWeek !== weekKey()) { s.weekPts = 0; s.lastWeek = weekKey(); changed = true; }
+  if (s.lastDay !== today()) { s.checked = {}; s.entries = {tokini:[],media:[]}; s.dayPts = 0; s.lastDay = today(); changed = true; }
   if (!s.entries) s.entries = {tokini:[],media:[]};
   if (!s.entries.tokini) s.entries.tokini = [];
   if (!s.entries.media) s.entries.media = [];
+  if (changed) set(stateRef, s).catch(() => {});
   return s;
 }
 

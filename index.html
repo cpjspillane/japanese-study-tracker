@@ -39,6 +39,23 @@
     .sync-dot.synced { background: #1D9E75; }
     .sync-dot.syncing { background: #EF9F27; }
     .sync-dot.error { background: #E24B4A; }
+    .metrics-btn { background: #2a2a2a; border-color: rgba(255,255,255,0.1); color: #e8e8e4; }
+    .metrics-btn:hover { background: #333; }
+    .drawer-overlay { background: rgba(0,0,0,0.6); }
+    .drawer-panel { background: #1a1a1a; border-color: rgba(255,255,255,0.1); }
+    .drawer-handle-bar { background: #555; }
+    .drawer-title { color: #e8e8e4; }
+    .toggle-group { background: #222; }
+    .toggle-opt { color: #888; }
+    .toggle-opt.active { background: #333; color: #e8e8e4; box-shadow: none; }
+    .chart-label { fill: #888; }
+    .chart-sublabel { fill: #555; }
+    .chart-grid { stroke: rgba(255,255,255,0.06); }
+    .chart-goal-line { stroke: rgba(99,153,34,0.5); }
+    .chart-goal-label { fill: #639922; }
+    .chart-avg-label { fill: #888; }
+    .chart-empty { fill: #555; }
+    .chart-zero { fill: #555; }
   }
   .tracker { max-width: 480px; margin: 0 auto; }
   h2 { font-size: 20px; font-weight: 600; margin-bottom: 2px; }
@@ -99,8 +116,42 @@
   .goal-row { display: flex; align-items: center; gap: 10px; margin-top: 1rem; }
   .goal-input { width: 72px; font-size: 14px; padding: 5px 8px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; text-align: center; }
   .goal-label { font-size: 13px; color: #888; }
-  .reset-btn { margin-top: 1.25rem; width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #999; font-size: 13px; cursor: pointer; }
+  .reset-btn { margin-top: 8px; width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #999; font-size: 13px; cursor: pointer; }
   .reset-btn:hover { background: #f5f5f0; }
+
+  /* Metrics button */
+  .metrics-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 1.25rem; padding: 11px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.12); background: #fff; color: #1a1a1a; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .metrics-btn:hover { background: #f9f9f6; }
+  .metrics-btn svg { flex-shrink: 0; }
+
+  /* Drawer */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 100; }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer-panel { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top-left-radius: 16px; border-top-right-radius: 16px; border-top: 0.5px solid rgba(0,0,0,0.12); padding: 0 1.25rem 2rem; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); z-index: 101; max-height: 85vh; overflow-y: auto; }
+  .drawer-panel.open { transform: translateY(0); }
+  .drawer-handle { display: flex; justify-content: center; padding: 10px 0 6px; cursor: pointer; }
+  .drawer-handle-bar { width: 36px; height: 4px; border-radius: 2px; background: #ccc; }
+  .drawer-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+
+  /* Toggle */
+  .toggle-group { display: inline-flex; background: #eeeee9; border-radius: 8px; padding: 3px; margin-bottom: 16px; }
+  .toggle-opt { font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 6px; cursor: pointer; color: #777; transition: all 0.15s; user-select: none; }
+  .toggle-opt.active { background: #fff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+  /* Chart */
+  .chart-container { width: 100%; }
+  .chart-container svg { width: 100%; height: auto; display: block; }
+  .chart-label { fill: #777; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-sublabel { fill: #aaa; font-size: 9px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-grid { stroke: rgba(0,0,0,0.06); stroke-width: 0.5; }
+  .chart-goal-line { stroke: rgba(99,153,34,0.4); stroke-width: 1; stroke-dasharray: 4 3; }
+  .chart-goal-label { fill: #639922; font-size: 9px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-avg-label { fill: #999; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-empty { fill: #bbb; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-bar { fill: #1D9E75; }
+  .chart-bar-today { fill: #534AB7; }
+  .chart-bar-goal { fill: #639922; }
+  .chart-zero { fill: #ccc; }
 </style>
 </head>
 <body>
@@ -258,7 +309,24 @@
     <span class="goal-label">pts</span>
   </div>
 
+  <button class="metrics-btn" onclick="openDrawer()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="8" width="3" height="6" rx="0.5"/><rect x="6.5" y="4" width="3" height="10" rx="0.5"/><rect x="12" y="1" width="3" height="13" rx="0.5"/></svg>
+    View progress
+  </button>
+
   <button class="reset-btn" onclick="resetDay()">Reset today's checklist</button>
+</div>
+
+<!-- Metrics drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer-panel" id="drawer-panel">
+  <div class="drawer-handle" onclick="closeDrawer()"><div class="drawer-handle-bar"></div></div>
+  <div class="drawer-title">Progress</div>
+  <div class="toggle-group">
+    <div class="toggle-opt active" id="toggle-daily" onclick="setChartMode('daily')">Daily</div>
+    <div class="toggle-opt" id="toggle-weekly" onclick="setChartMode('weekly')">Weekly</div>
+  </div>
+  <div class="chart-container" id="chart-container"></div>
 </div>
 
 <script type="module">
@@ -289,13 +357,30 @@ const BASE={anki:1,renshuu:1,crash:7,preply:3};
 const CAPS={tokini:8,media:10};
 const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:2,manga:3}};
 
-function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function weekKey(){const d=new Date(),s=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
-function blank(){return{checked:{},entries:{tokini:[],media:[]},dayPts:0,weekPts:0,totalPts:0,streak:0,lastDay:null,lastWeek:null,goal:50};}
+function today(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+// ISO 8601 week number — weeks start on Monday
+function weekKey(d){
+  if(!d) d=new Date();
+  const t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+  // Set to nearest Thursday (ISO: week with Thursday determines year)
+  t.setDate(t.getDate()+3-((t.getDay()+6)%7));
+  const jan4=new Date(t.getFullYear(),0,4);
+  const wn=1+Math.round(((t-jan4)/86400000-(3-((jan4.getDay()+6)%7)))/7);
+  return t.getFullYear()+'-W'+String(wn).padStart(2,'0');
+}
+
+function blank(){
+  return {checked:{},entries:{tokini:[],media:[]},dayPts:0,weekPts:0,totalPts:0,streak:0,lastDay:null,lastWeek:null,goal:50,history:{daily:{},weekly:{}}};
+}
 
 let state = blank();
 let saveTimer = null;
 let loaded = false;
+let chartMode = 'daily';
 
 function setSyncStatus(status, text) {
   const dot = document.getElementById('sync-dot');
@@ -314,15 +399,53 @@ function scheduleSave() {
   }, 600);
 }
 
+function ensureHistory(s) {
+  if (!s.history) s.history = {daily:{},weekly:{}};
+  if (!s.history.daily) s.history.daily = {};
+  if (!s.history.weekly) s.history.weekly = {};
+}
+
 function freshState(s) {
   let changed = false;
-  if (s.lastWeek !== weekKey()) { s.weekPts = 0; s.lastWeek = weekKey(); changed = true; }
-  if (s.lastDay !== today()) { s.checked = {}; s.entries = {tokini:[],media:[]}; s.dayPts = 0; s.lastDay = today(); changed = true; }
+  ensureHistory(s);
+
+  // Archive the previous day before resetting
+  if (s.lastDay && s.lastDay !== today()) {
+    s.history.daily[s.lastDay] = s.dayPts || 0;
+    changed = true;
+  }
+
+  // Week rollover (Monday-based via ISO week)
+  if (s.lastWeek && s.lastWeek !== weekKey()) {
+    // Snapshot completed week total from accumulated daily values
+    recalcWeeklyFromDaily(s, s.lastWeek);
+    s.weekPts = 0; s.lastWeek = weekKey(); changed = true;
+  } else if (!s.lastWeek) {
+    s.lastWeek = weekKey(); changed = true;
+  }
+
+  // Day rollover
+  if (s.lastDay !== today()) {
+    s.checked = {}; s.entries = {tokini:[],media:[]}; s.dayPts = 0; s.lastDay = today(); changed = true;
+  }
+
   if (!s.entries) s.entries = {tokini:[],media:[]};
   if (!s.entries.tokini) s.entries.tokini = [];
   if (!s.entries.media) s.entries.media = [];
+
   if (changed) set(stateRef, s).catch(() => {});
   return s;
+}
+
+// Sum all daily values that fall within a given ISO week
+function recalcWeeklyFromDaily(s, wk) {
+  ensureHistory(s);
+  let total = 0;
+  for (const [dateStr, pts] of Object.entries(s.history.daily)) {
+    const d = new Date(dateStr + 'T12:00:00');
+    if (weekKey(d) === wk) total += pts;
+  }
+  if (total > 0) s.history.weekly[wk] = total;
 }
 
 onValue(stateRef, (snapshot) => {
@@ -340,6 +463,7 @@ onValue(stateRef, (snapshot) => {
     setTimeout(() => setSyncStatus('synced', 'Synced'), 2000);
   }
   render();
+  renderChart();
 }, (error) => {
   setSyncStatus('error', 'Connection failed');
 });
@@ -347,11 +471,17 @@ onValue(stateRef, (snapshot) => {
 function entrySum(key){return(state.entries[key]||[]).reduce((t,e)=>t+e.pts,0);}
 function addPts(n){state.dayPts+=n;state.weekPts+=n;state.totalPts+=n;}
 
+function syncTodayHistory() {
+  ensureHistory(state);
+  state.history.daily[today()] = Math.max(0, state.dayPts);
+}
+
 window.toggleSimple = function(key) {
   const was=state.checked[key];
   if(was){state.checked[key]=false;addPts(-BASE[key]);}
   else{state.checked[key]=true;addPts(BASE[key]);}
-  scheduleSave();render();
+  syncTodayHistory();
+  scheduleSave();render();renderChart();
 };
 
 window.togglePicker = function(key) {
@@ -368,26 +498,179 @@ window.addEntry = function(key,type,basePts,label) {
   const actual=Math.min(basePts,remaining);
   state.entries[key].push({type,label,pts:actual});
   addPts(actual);
+  syncTodayHistory();
   document.getElementById('picker-'+key).style.display='none';
-  scheduleSave();render();
+  scheduleSave();render();renderChart();
 };
 
 window.removeEntry = function(key,idx) {
   addPts(-state.entries[key][idx].pts);
   state.entries[key].splice(idx,1);
-  scheduleSave();render();
+  syncTodayHistory();
+  scheduleSave();render();renderChart();
 };
 
 window.updateGoal = function() {
   const v=parseInt(document.getElementById('goal-input').value);
-  if(!isNaN(v)&&v>=10){state.goal=v;scheduleSave();render();}
+  if(!isNaN(v)&&v>=10){state.goal=v;scheduleSave();render();renderChart();}
 };
 
 window.resetDay = function() {
   addPts(-state.dayPts);
   state.checked={};state.entries={tokini:[],media:[]};state.dayPts=0;
-  scheduleSave();render();
+  syncTodayHistory();
+  scheduleSave();render();renderChart();
 };
+
+// Drawer
+window.openDrawer = function() {
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('drawer-panel').classList.add('open');
+  renderChart();
+};
+
+window.closeDrawer = function() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('drawer-panel').classList.remove('open');
+};
+
+window.setChartMode = function(mode) {
+  chartMode = mode;
+  document.getElementById('toggle-daily').className = 'toggle-opt' + (mode==='daily'?' active':'');
+  document.getElementById('toggle-weekly').className = 'toggle-opt' + (mode==='weekly'?' active':'');
+  renderChart();
+};
+
+// Get the Monday of an ISO week string like "2026-W12"
+function mondayOfWeek(wkStr) {
+  const m = wkStr.match(/(\d{4})-W(\d{2})/);
+  if (!m) return null;
+  const year = parseInt(m[1]), week = parseInt(m[2]);
+  const jan4 = new Date(year, 0, 4);
+  const dow = (jan4.getDay() + 6) % 7; // 0=Mon
+  const mon = new Date(jan4);
+  mon.setDate(jan4.getDate() - dow + (week - 1) * 7);
+  return mon;
+}
+
+function renderChart() {
+  const container = document.getElementById('chart-container');
+  if (!container) return;
+
+  ensureHistory(state);
+  const history = state.history;
+  let data = [];
+  let goalLine = null;
+  const DAYABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  if (chartMode === 'daily') {
+    for (let i = 9; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      const label = DAYABBR[d.getDay()];
+      const sublabel = String(d.getMonth()+1)+'/'+d.getDate();
+      let pts = history.daily[key];
+      const isToday = key === today();
+      if (isToday) pts = Math.max(0, state.dayPts);
+      data.push({ key, label, sublabel, pts: pts !== undefined ? pts : null, isToday });
+    }
+    goalLine = Math.round(state.goal / 7);
+  } else {
+    // Build unique last 10 weeks
+    const seen = new Set();
+    for (let i = 69; i >= 0; i--) { // scan back ~10 weeks of days
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const wk = weekKey(d);
+      if (seen.has(wk)) continue;
+      seen.add(wk);
+      const isCurrent = wk === weekKey();
+      let pts = history.weekly[wk];
+      if (isCurrent) pts = Math.max(0, state.weekPts);
+      const label = wk.split('-')[1]; // "W12"
+      const mon = mondayOfWeek(wk);
+      const sublabel = mon ? (String(mon.getMonth()+1)+'/'+mon.getDate()) : '';
+      data.push({ key: wk, label, sublabel, pts: pts !== undefined ? pts : null, isToday: isCurrent });
+    }
+    // Keep last 10
+    data = data.slice(-10);
+    goalLine = state.goal;
+  }
+
+  // SVG dimensions
+  const W = 440, H = 200;
+  const PAD = { top: 22, right: 12, bottom: 38, left: 6 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
+  const n = data.length;
+
+  if (n === 0) {
+    container.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'"><text x="'+(W/2)+'" y="'+(H/2)+'" text-anchor="middle" class="chart-empty">No data yet</text></svg>';
+    return;
+  }
+
+  const vals = data.map(d => d.pts || 0);
+  const maxVal = Math.max(...vals, goalLine || 0, 1);
+  const ceil = maxVal * 1.2;
+  const yScale = chartH / ceil;
+  const barW = Math.min(30, (chartW / n) * 0.55);
+  const gap = chartW / n;
+
+  let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+
+  // Horizontal grid lines
+  const gridCount = 3;
+  for (let i = 1; i <= gridCount; i++) {
+    const yy = PAD.top + chartH - (chartH / gridCount * i);
+    svg += '<line x1="'+PAD.left+'" y1="'+yy+'" x2="'+(W-PAD.right)+'" y2="'+yy+'" class="chart-grid"/>';
+  }
+
+  // Goal reference line
+  if (goalLine && goalLine > 0 && goalLine * yScale <= chartH) {
+    const gy = PAD.top + chartH - goalLine * yScale;
+    svg += '<line x1="'+PAD.left+'" y1="'+gy+'" x2="'+(W-PAD.right)+'" y2="'+gy+'" class="chart-goal-line"/>';
+    const goalText = chartMode==='daily' ? '~'+goalLine+'/day' : 'goal: '+goalLine;
+    svg += '<text x="'+(W-PAD.right)+'" y="'+(gy-4)+'" text-anchor="end" class="chart-goal-label">'+goalText+'</text>';
+  }
+
+  // Bars
+  data.forEach((d, i) => {
+    const cx = PAD.left + gap * i + gap / 2;
+    const x = cx - barW / 2;
+    const val = d.pts || 0;
+
+    if (d.pts !== null && val > 0) {
+      const barH = Math.max(2, val * yScale);
+      const y = PAD.top + chartH - barH;
+      let cls = 'chart-bar';
+      if (d.isToday) cls = 'chart-bar-today';
+      else if (goalLine && val >= goalLine) cls = 'chart-bar-goal';
+      svg += '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+barH+'" class="'+cls+'" rx="3" ry="3"/>';
+      svg += '<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label" style="font-size:10px;font-weight:600">'+val+'</text>';
+    } else if (d.pts !== null) {
+      // Zero day — small dot
+      svg += '<circle cx="'+cx+'" cy="'+(PAD.top+chartH-1)+'" r="2" class="chart-zero"/>';
+    }
+    // No bar or dot if pts is null (no data for that day/week)
+
+    // X labels
+    const bold = d.isToday ? ' style="font-weight:600"' : '';
+    svg += '<text x="'+cx+'" y="'+(PAD.top+chartH+14)+'" text-anchor="middle" class="chart-label"'+bold+'>'+d.label+'</text>';
+    svg += '<text x="'+cx+'" y="'+(PAD.top+chartH+25)+'" text-anchor="middle" class="chart-sublabel">'+d.sublabel+'</text>';
+  });
+
+  // Average (exclude today/current and null entries)
+  const past = data.filter(d => d.pts !== null && d.pts > 0 && !d.isToday);
+  if (past.length > 0) {
+    const avg = Math.round(past.reduce((a,b)=>a+b.pts,0) / past.length * 10) / 10;
+    const unit = chartMode==='daily' ? ' pts/day' : ' pts/wk';
+    svg += '<text x="'+PAD.left+'" y="'+(H-2)+'" class="chart-avg-label">avg: '+avg+unit+'</text>';
+  }
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
 
 function getLvl(tp){for(let i=LEVELS.length-1;i>=0;i--){if(tp>=LEVELS[i].pts)return i;}return 0;}
 

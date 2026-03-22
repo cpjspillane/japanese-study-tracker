@@ -89,29 +89,23 @@
   .toggle-opt.active { background: #fff; color: #1a1a1a; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 
   /* Chart */
-  .chart-container { width: 100%; }
+  .chart-container { width: 100%; position: relative; }
   .chart-container svg { width: 100%; height: auto; display: block; }
   .chart-label { fill: #777; font-size: 11px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   .chart-sublabel { fill: #aaa; font-size: 9px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   .chart-grid { stroke: rgba(0,0,0,0.06); stroke-width: 0.5; }
   .chart-goal-line { stroke: rgba(99,153,34,0.4); stroke-width: 1; stroke-dasharray: 4 3; }
   .chart-goal-label { fill: #639922; font-size: 9px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-  .chart-avg-label { fill: #999; font-size: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-avg-label { fill: #999; font-size: 9px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .chart-avg-line { stroke: rgba(0,0,0,0.25); stroke-width: 1; stroke-dasharray: 2 3; }
   .chart-empty { fill: #bbb; font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
   .chart-bar { fill: #1D9E75; }
   .chart-bar-today { fill: #534AB7; }
   .chart-bar-goal { fill: #639922; }
   .chart-zero { fill: #ccc; }
-
-  /* History edit */
-  .edit-section { margin-top: 20px; padding-top: 16px; border-top: 0.5px solid rgba(0,0,0,0.08); }
-  .edit-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-  .edit-desc { font-size: 11px; color: #888; margin-bottom: 10px; }
-  .edit-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
-  .edit-day { font-size: 13px; color: #777; width: 100px; flex-shrink: 0; }
-  .edit-day-today { color: #1a1a1a; font-weight: 500; }
-  .edit-input { width: 56px; font-size: 14px; padding: 4px 6px; border-radius: 6px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; text-align: center; }
-  .edit-pts-label { font-size: 12px; color: #888; }
+  .chart-edit-input { width: 36px; font-size: 10px; font-weight: 600; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 1px 2px; border-radius: 4px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; text-align: center; outline: none; }
+  .chart-editable { cursor: pointer; }
+  .chart-editable:hover { opacity: 0.6; }
 
   @media (prefers-color-scheme: dark) {
     body { background: #1a1a1a; color: #e8e8e4; }
@@ -174,13 +168,10 @@
     .chart-goal-line { stroke: rgba(99,153,34,0.5); }
     .chart-goal-label { fill: #7ab832; }
     .chart-avg-label { fill: #999; }
+    .chart-avg-line { stroke: rgba(255,255,255,0.25); }
     .chart-empty { fill: #666; }
     .chart-zero { fill: #555; }
-    .edit-section { border-color: rgba(255,255,255,0.08); }
-    .edit-day { color: #999; }
-    .edit-day-today { color: #e8e8e4; }
-    .edit-input { background: #2a2a2a; border-color: rgba(255,255,255,0.2); color: #e8e8e4; }
-    .edit-pts-label { color: #999; }
+    .chart-edit-input { background: #2a2a2a; border-color: rgba(255,255,255,0.2); color: #e8e8e4; }
   }
 </style>
 </head>
@@ -368,11 +359,6 @@
     <div class="toggle-opt" id="toggle-weekly" onclick="setChartMode('weekly')">Weekly</div>
   </div>
   <div class="chart-container" id="chart-container"></div>
-  <div class="edit-section">
-    <div class="edit-title">Adjust recent days</div>
-    <div class="edit-desc">Correct points if you forgot to log, or logged late</div>
-    <div id="edit-rows"></div>
-  </div>
 </div>
 
 <script type="module">
@@ -605,36 +591,45 @@ window.adjustDay = function(dateStr, newPts) {
   const affectedWk = weekKey(new Date(dateStr + 'T12:00:00'));
   recalcWeeklyFromDaily(state, affectedWk);
 
-  scheduleSave(); render(); renderChart(); renderEditRows();
+  scheduleSave(); render(); renderChart();
 };
 
-function renderEditRows() {
-  const container = document.getElementById('edit-rows');
-  if (!container) return;
-  ensureHistory(state);
+window.startEditBar = function(dateKey, svgX, svgY, currentVal) {
+  const container = document.getElementById('chart-container');
+  const svgEl = container.querySelector('svg');
+  if (!svgEl) return;
+  const existing = container.querySelector('.chart-edit-input');
+  if (existing) existing.remove();
 
-  const DAYABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  let html = '';
+  const rect = svgEl.getBoundingClientRect();
+  const viewBox = svgEl.viewBox.baseVal;
+  const scaleX = rect.width / viewBox.width;
+  const scaleY = rect.height / viewBox.height;
 
-  for (let i = 2; i >= 1; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    const label = i === 1 ? 'Yesterday' : DAYABBR[d.getDay()];
-    const dateSub = MONTHS[d.getMonth()] + ' ' + d.getDate();
-    let pts = state.history.daily[key];
-    if (pts === undefined) pts = '';
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.className = 'chart-edit-input';
+  input.min = '0';
+  input.max = '50';
+  input.value = currentVal;
+  input.style.position = 'absolute';
+  input.style.left = (svgX * scaleX - 18) + 'px';
+  input.style.top = (svgY * scaleY) + 'px';
+  container.appendChild(input);
+  input.focus();
+  input.select();
 
-    html += '<div class="edit-row">';
-    html += '<div class="edit-day">' + label + '<br><span style="font-size:11px;font-weight:400;opacity:0.6">' + dateSub + '</span></div>';
-    html += '<input type="number" class="edit-input" min="0" max="50" value="' + (pts !== '' ? pts : 0) + '" onchange="adjustDay(\'' + key + '\', this.value)" onfocus="this.select()">';
-    html += '<span class="edit-pts-label">pts</span>';
-    html += '</div>';
+  function commit() {
+    const v = parseInt(input.value);
+    if (!isNaN(v) && v >= 0) adjustDay(dateKey, v);
+    if (input.parentNode) input.remove();
   }
-
-  container.innerHTML = html;
-}
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { if (input.parentNode) input.remove(); }
+  });
+};
 
 window.toggleSimple = function(key) {
   const was=state.checked[key];
@@ -683,11 +678,27 @@ window.resetDay = function() {
 };
 
 // Drawer
+function sizeChart() {
+  requestAnimationFrame(() => {
+    const panel = document.getElementById('drawer-panel');
+    const container = document.getElementById('chart-container');
+    const svg = container.querySelector('svg');
+    if (!panel || !svg) return;
+    const panelH = Math.min(window.innerHeight * 0.85, window.innerHeight);
+    const handleH = panel.querySelector('.drawer-handle').offsetHeight;
+    const titleH = panel.querySelector('.drawer-title').offsetHeight;
+    const toggleH = panel.querySelector('.toggle-group').offsetHeight;
+    const pad = 48;
+    const available = panelH - handleH - titleH - toggleH - pad;
+    svg.style.maxHeight = Math.max(100, available) + 'px';
+  });
+}
+
 window.openDrawer = function() {
   document.getElementById('drawer-overlay').classList.add('open');
   document.getElementById('drawer-panel').classList.add('open');
   renderChart();
-  renderEditRows();
+  sizeChart();
 };
 
 window.closeDrawer = function() {
@@ -695,11 +706,16 @@ window.closeDrawer = function() {
   document.getElementById('drawer-panel').classList.remove('open');
 };
 
+window.addEventListener('resize', () => {
+  if (document.getElementById('drawer-panel').classList.contains('open')) sizeChart();
+});
+
 window.setChartMode = function(mode) {
   chartMode = mode;
   document.getElementById('toggle-daily').className = 'toggle-opt' + (mode==='daily'?' active':'');
   document.getElementById('toggle-weekly').className = 'toggle-opt' + (mode==='weekly'?' active':'');
   renderChart();
+  sizeChart();
 };
 
 // Get the Monday of an ISO week string like "2026-W12"
@@ -734,7 +750,7 @@ function renderChart() {
       let pts = history.daily[key];
       const isToday = key === today();
       if (isToday) pts = Math.max(0, state.dayPts);
-      data.push({ key, label, sublabel, pts: pts !== undefined ? pts : null, isToday });
+      data.push({ key, label, sublabel, pts: pts !== undefined ? pts : null, isToday, daysAgo: i });
     }
     goalLine = Math.round(state.goal / 7);
   } else {
@@ -761,7 +777,7 @@ function renderChart() {
 
   // SVG dimensions
   const W = 440, H = 200;
-  const PAD = { top: 22, right: 12, bottom: 38, left: 6 };
+  const PAD = { top: 22, right: 72, bottom: 38, left: 6 };
   const chartW = W - PAD.left - PAD.right;
   const chartH = H - PAD.top - PAD.bottom;
   const n = data.length;
@@ -771,12 +787,17 @@ function renderChart() {
     return;
   }
 
+  // Compute average (exclude today/current and null entries)
+  const past = data.filter(d => d.pts !== null && d.pts > 0 && !d.isToday);
+  const avg = past.length > 0 ? Math.round(past.reduce((a,b)=>a+b.pts,0) / past.length * 10) / 10 : null;
+
   const vals = data.map(d => d.pts || 0);
-  const maxVal = Math.max(...vals, goalLine || 0, 1);
+  const maxVal = Math.max(...vals, goalLine || 0, avg || 0, 1);
   const ceil = maxVal * 1.2;
   const yScale = chartH / ceil;
   const barW = Math.min(30, (chartW / n) * 0.55);
   const gap = chartW / n;
+  const labelX = W - PAD.right + 8;
 
   let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
 
@@ -784,15 +805,29 @@ function renderChart() {
   const gridCount = 3;
   for (let i = 1; i <= gridCount; i++) {
     const yy = PAD.top + chartH - (chartH / gridCount * i);
-    svg += '<line x1="'+PAD.left+'" y1="'+yy+'" x2="'+(W-PAD.right)+'" y2="'+yy+'" class="chart-grid"/>';
+    svg += '<line x1="'+PAD.left+'" y1="'+yy+'" x2="'+(PAD.left+chartW)+'" y2="'+yy+'" class="chart-grid"/>';
   }
 
   // Goal reference line
+  let goalLabelY = null;
   if (goalLine && goalLine > 0 && goalLine * yScale <= chartH) {
     const gy = PAD.top + chartH - goalLine * yScale;
-    svg += '<line x1="'+PAD.left+'" y1="'+gy+'" x2="'+(W-PAD.right)+'" y2="'+gy+'" class="chart-goal-line"/>';
+    svg += '<line x1="'+PAD.left+'" y1="'+gy+'" x2="'+(PAD.left+chartW)+'" y2="'+gy+'" class="chart-goal-line"/>';
     const goalText = chartMode==='daily' ? '~'+goalLine+'/day' : 'goal: '+goalLine;
-    svg += '<text x="'+(W-PAD.right)+'" y="'+(gy-4)+'" text-anchor="end" class="chart-goal-label">'+goalText+'</text>';
+    goalLabelY = gy + 3;
+    svg += '<text x="'+labelX+'" y="'+goalLabelY+'" text-anchor="start" class="chart-goal-label">'+goalText+'</text>';
+  }
+
+  // Average reference line
+  if (avg !== null && avg > 0 && avg * yScale <= chartH) {
+    const ay = PAD.top + chartH - avg * yScale;
+    svg += '<line x1="'+PAD.left+'" y1="'+ay+'" x2="'+(PAD.left+chartW)+'" y2="'+ay+'" class="chart-avg-line"/>';
+    const avgRounded = Math.round(avg * 10) / 10;
+    let avgLabelY = ay + 3;
+    if (goalLabelY !== null && Math.abs(avgLabelY - goalLabelY) < 12) {
+      avgLabelY = goalLabelY > avgLabelY ? goalLabelY - 12 : goalLabelY + 12;
+    }
+    svg += '<text x="'+labelX+'" y="'+avgLabelY+'" text-anchor="start" class="chart-avg-label">avg: '+avgRounded+'</text>';
   }
 
   // Bars
@@ -800,6 +835,7 @@ function renderChart() {
     const cx = PAD.left + gap * i + gap / 2;
     const x = cx - barW / 2;
     const val = d.pts || 0;
+    const editable = chartMode === 'daily' && (d.daysAgo === 1 || d.daysAgo === 2);
 
     if (d.pts !== null && val > 0) {
       const barH = Math.max(2, val * yScale);
@@ -808,26 +844,25 @@ function renderChart() {
       if (d.isToday) cls = 'chart-bar-today';
       else if (goalLine && val >= goalLine) cls = 'chart-bar-goal';
       svg += '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+barH+'" class="'+cls+'" rx="3" ry="3"/>';
-      svg += '<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label" style="font-size:10px;font-weight:600">'+val+'</text>';
+      if (editable) {
+        svg += '<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;font-weight:600" onclick="startEditBar(\''+d.key+'\','+cx+','+(y-16)+','+val+')">'+val+'</text>';
+      } else {
+        svg += '<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label" style="font-size:10px;font-weight:600">'+val+'</text>';
+      }
     } else if (d.pts !== null) {
-      // Zero day — small dot
       svg += '<circle cx="'+cx+'" cy="'+(PAD.top+chartH-1)+'" r="2" class="chart-zero"/>';
+      if (editable) {
+        svg += '<text x="'+cx+'" y="'+(PAD.top+chartH-10)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;font-weight:600;cursor:pointer" onclick="startEditBar(\''+d.key+'\','+cx+','+(PAD.top+chartH-22)+','+val+')">'+val+'</text>';
+      }
+    } else if (editable) {
+      svg += '<text x="'+cx+'" y="'+(PAD.top+chartH-10)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;cursor:pointer" onclick="startEditBar(\''+d.key+'\','+cx+','+(PAD.top+chartH-22)+',0)">—</text>';
     }
-    // No bar or dot if pts is null (no data for that day/week)
 
     // X labels
     const bold = d.isToday ? ' style="font-weight:600"' : '';
     svg += '<text x="'+cx+'" y="'+(PAD.top+chartH+14)+'" text-anchor="middle" class="chart-label"'+bold+'>'+d.label+'</text>';
     svg += '<text x="'+cx+'" y="'+(PAD.top+chartH+25)+'" text-anchor="middle" class="chart-sublabel">'+d.sublabel+'</text>';
   });
-
-  // Average (exclude today/current and null entries)
-  const past = data.filter(d => d.pts !== null && d.pts > 0 && !d.isToday);
-  if (past.length > 0) {
-    const avg = Math.round(past.reduce((a,b)=>a+b.pts,0) / past.length * 10) / 10;
-    const unit = chartMode==='daily' ? ' pts/day' : ' pts/wk';
-    svg += '<text x="'+PAD.left+'" y="'+(H-2)+'" class="chart-avg-label">avg: '+avg+unit+'</text>';
-  }
 
   svg += '</svg>';
   container.innerHTML = svg;

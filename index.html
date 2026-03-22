@@ -152,6 +152,22 @@
   .chart-bar-today { fill: #534AB7; }
   .chart-bar-goal { fill: #639922; }
   .chart-zero { fill: #ccc; }
+
+  /* History edit */
+  .edit-section { margin-top: 20px; padding-top: 16px; border-top: 0.5px solid rgba(0,0,0,0.08); }
+  .edit-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .edit-desc { font-size: 11px; color: #888; margin-bottom: 10px; }
+  .edit-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+  .edit-day { font-size: 13px; color: #777; width: 100px; flex-shrink: 0; }
+  .edit-day-today { color: #1a1a1a; font-weight: 500; }
+  .edit-input { width: 56px; font-size: 14px; padding: 4px 6px; border-radius: 6px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; text-align: center; }
+  .edit-pts-label { font-size: 12px; color: #888; }
+  @media (prefers-color-scheme: dark) {
+    .edit-section { border-color: rgba(255,255,255,0.08); }
+    .edit-day { color: #888; }
+    .edit-day-today { color: #e8e8e4; }
+    .edit-input { background: #2a2a2a; border-color: rgba(255,255,255,0.2); color: #e8e8e4; }
+  }
 </style>
 </head>
 <body>
@@ -327,6 +343,11 @@
     <div class="toggle-opt" id="toggle-weekly" onclick="setChartMode('weekly')">Weekly</div>
   </div>
   <div class="chart-container" id="chart-container"></div>
+  <div class="edit-section">
+    <div class="edit-title">Adjust recent days</div>
+    <div class="edit-desc">Correct points if you forgot to log, or logged late</div>
+    <div id="edit-rows"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -405,6 +426,28 @@ function ensureHistory(s) {
   if (!s.history.weekly) s.history.weekly = {};
 }
 
+// Recalculate weekPts from daily history for the current ISO week
+function recalcWeekPts(s) {
+  ensureHistory(s);
+  const curWk = weekKey();
+  let total = 0;
+  for (const [dateStr, pts] of Object.entries(s.history.daily)) {
+    const d = new Date(dateStr + 'T12:00:00');
+    if (weekKey(d) === curWk) total += pts;
+  }
+  return total;
+}
+
+// Recalculate totalPts from all daily history
+function recalcTotalPts(s) {
+  ensureHistory(s);
+  let total = 0;
+  for (const pts of Object.values(s.history.daily)) {
+    total += (pts || 0);
+  }
+  return total;
+}
+
 function freshState(s) {
   let changed = false;
   ensureHistory(s);
@@ -417,9 +460,13 @@ function freshState(s) {
 
   // Week rollover (Monday-based via ISO week)
   if (s.lastWeek && s.lastWeek !== weekKey()) {
-    // Snapshot completed week total from accumulated daily values
-    recalcWeeklyFromDaily(s, s.lastWeek);
-    s.weekPts = 0; s.lastWeek = weekKey(); changed = true;
+    // Check if this is a genuine week change vs. a weekKey format migration.
+    const lastDayInCurrentWeek = s.lastDay && weekKey(new Date(s.lastDay + 'T12:00:00')) === weekKey();
+    if (!lastDayInCurrentWeek) {
+      // Genuine week rollover — snapshot completed week
+      recalcWeeklyFromDaily(s, s.lastWeek);
+    }
+    s.lastWeek = weekKey(); changed = true;
   } else if (!s.lastWeek) {
     s.lastWeek = weekKey(); changed = true;
   }
@@ -433,8 +480,40 @@ function freshState(s) {
   if (!s.entries.tokini) s.entries.tokini = [];
   if (!s.entries.media) s.entries.media = [];
 
+  // Always recalculate weekPts and totalPts from history (source of truth)
+  s.weekPts = recalcWeekPts(s);
+  s.totalPts = recalcTotalPts(s);
+  s.streak = calcStreak(s);
+
   if (changed) set(stateRef, s).catch(() => {});
   return s;
+}
+
+// Count consecutive days with pts > 0, going backwards from today
+function calcStreak(s) {
+  ensureHistory(s);
+  let streak = 0;
+  const d = new Date();
+  // If today has points, count it; otherwise start from yesterday
+  const todayPts = s.dayPts || 0;
+  if (todayPts > 0) {
+    streak = 1;
+    d.setDate(d.getDate() - 1);
+  } else {
+    d.setDate(d.getDate() - 1);
+  }
+  // Walk backwards through previous days
+  for (let i = 0; i < 365; i++) {
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const pts = s.history.daily[key];
+    if (pts !== undefined && pts > 0) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
 }
 
 // Sum all daily values that fall within a given ISO week
@@ -474,6 +553,68 @@ function addPts(n){state.dayPts+=n;state.weekPts+=n;state.totalPts+=n;}
 function syncTodayHistory() {
   ensureHistory(state);
   state.history.daily[today()] = Math.max(0, state.dayPts);
+  state.weekPts = recalcWeekPts(state);
+  state.totalPts = recalcTotalPts(state);
+  state.streak = calcStreak(state);
+}
+
+// Retroactively adjust points for a past day (up to 2 days back)
+window.adjustDay = function(dateStr, newPts) {
+  const val = parseInt(newPts);
+  if (isNaN(val) || val < 0) return;
+  ensureHistory(state);
+
+  if (dateStr === today()) {
+    // For today, update dayPts and sync
+    state.dayPts = val;
+    state.history.daily[today()] = val;
+  } else {
+    state.history.daily[dateStr] = val;
+  }
+
+  // Recalculate everything from history
+  state.weekPts = recalcWeekPts(state);
+  state.totalPts = recalcTotalPts(state);
+  state.streak = calcStreak(state);
+  // Rebuild weekly history for any affected week
+  const affectedWk = weekKey(new Date(dateStr + 'T12:00:00'));
+  recalcWeeklyFromDaily(state, affectedWk);
+
+  scheduleSave(); render(); renderChart(); renderEditRows();
+};
+
+function renderEditRows() {
+  const container = document.getElementById('edit-rows');
+  if (!container) return;
+  ensureHistory(state);
+
+  const DAYABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html = '';
+
+  for (let i = 2; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const isToday = i === 0;
+    const label = isToday ? 'Today' : (i === 1 ? 'Yesterday' : DAYABBR[d.getDay()]);
+    const dateSub = MONTHS[d.getMonth()] + ' ' + d.getDate();
+    let pts;
+    if (isToday) {
+      pts = Math.max(0, state.dayPts);
+    } else {
+      pts = state.history.daily[key];
+      if (pts === undefined) pts = '';
+    }
+
+    html += '<div class="edit-row">';
+    html += '<div class="edit-day' + (isToday ? ' edit-day-today' : '') + '">' + label + '<br><span style="font-size:11px;font-weight:400;opacity:0.6">' + dateSub + '</span></div>';
+    html += '<input type="number" class="edit-input" min="0" max="50" value="' + (pts !== '' ? pts : 0) + '" onchange="adjustDay(\'' + key + '\', this.value)" onfocus="this.select()">';
+    html += '<span class="edit-pts-label">pts</span>';
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 window.toggleSimple = function(key) {
@@ -527,6 +668,7 @@ window.openDrawer = function() {
   document.getElementById('drawer-overlay').classList.add('open');
   document.getElementById('drawer-panel').classList.add('open');
   renderChart();
+  renderEditRows();
 };
 
 window.closeDrawer = function() {

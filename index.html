@@ -109,7 +109,36 @@
   .chart-editable { cursor: pointer; }
   .chart-editable:hover { opacity: 0.6; }
 
+  /* Level art overlay */
+  .lvl-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  .lvl-overlay.open { opacity: 1; pointer-events: auto; }
+  .lvl-card { background: #fff; border-radius: 16px; overflow: hidden; width: min(340px, 90vw); box-shadow: 0 24px 64px rgba(0,0,0,0.4); transform: scale(0.92); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); }
+  .lvl-overlay.open .lvl-card { transform: scale(1); }
+  .lvl-card img { width: 100%; display: block; }
+  .lvl-placeholder { width: 100%; aspect-ratio: 3/4; background: #eeeee9; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 2rem; }
+  .lvl-placeholder-text { font-size: 52px; color: #ccc; text-align: center; line-height: 1.2; }
+  .lvl-placeholder-msg { font-size: 12px; color: #bbb; text-align: center; line-height: 1.6; max-width: 180px; }
+  .lvl-card-footer { padding: 1rem 1.25rem 1.25rem; }
+  .lvl-levelup-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #534AB7; margin-bottom: 4px; }
+  .lvl-card-title { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
+  .lvl-card-sub { font-size: 13px; color: #888; margin-bottom: 2px; }
+  .lvl-card-tier { font-size: 11px; color: #bbb; }
+  .lvl-dismiss { font-size: 12px; color: #bbb; text-align: center; padding: 0.75rem; cursor: pointer; }
+
+  /* Progress bar level-up pulse */
+  @keyframes lvl-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .fill-level.pulse { animation: lvl-pulse 0.4s ease 2; }
+
   @media (prefers-color-scheme: dark) {
+    .lvl-card { background: #2a2a2a; }
+    .lvl-placeholder { background: #222; }
+    .lvl-placeholder-text { color: #444; }
+    .lvl-placeholder-msg { color: #555; }
+    .lvl-card-title { color: #e8e8e4; }
+    .lvl-card-sub { color: #777; }
+    .lvl-card-tier { color: #555; }
+    .lvl-dismiss { color: #555; }
+  }
     body { background: #1a1a1a; color: #e8e8e4; }
     h2 { color: #e8e8e4; }
     .date-label { color: #777; }
@@ -358,6 +387,20 @@
   <button class="reset-btn" onclick="resetDay()">Reset today's checklist</button>
 </div>
 
+<!-- Level art overlay -->
+<div class="lvl-overlay" id="lvl-overlay" onclick="closeLvlOverlay()">
+  <div class="lvl-card" onclick="event.stopPropagation()">
+    <div id="lvl-img-wrap"></div>
+    <div class="lvl-card-footer">
+      <div class="lvl-levelup-badge" id="lvl-badge"></div>
+      <div class="lvl-card-title" id="lvl-card-title"></div>
+      <div class="lvl-card-sub" id="lvl-card-sub"></div>
+      <div class="lvl-card-tier" id="lvl-card-tier"></div>
+    </div>
+    <div class="lvl-dismiss" onclick="closeLvlOverlay()">Tap to dismiss</div>
+  </div>
+</div>
+
 <!-- Metrics drawer -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
 <div class="drawer-panel" id="drawer-panel">
@@ -387,6 +430,53 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const stateRef = ref(db, 'tracker/state');
+
+const LEVEL_IMAGES = {
+  0: 'images/levels/lvl-00.png',
+  1: 'images/levels/lvl-01.png',
+  // add more as art is completed
+};
+
+const TIER_NAMES = [
+  'The Tourist',      // 0–10
+  'The Student',      // 11–20
+  'The Samurai Anime Arc', // 21–30
+  'The Samurai Saga', // 31–40
+  'The Ascetic Path', // 41–50
+  'Supernatural Mastery', // 51–57
+];
+
+function tierForLevel(lvl) {
+  if (lvl <= 10) return 0;
+  if (lvl <= 20) return 1;
+  if (lvl <= 30) return 2;
+  if (lvl <= 40) return 3;
+  if (lvl <= 50) return 4;
+  return 5;
+}
+
+window.openLvlOverlay = function(lvl, isLevelUp) {
+  const data = LEVELS[lvl];
+  const imgWrap = document.getElementById('lvl-img-wrap');
+  const imagePath = LEVEL_IMAGES[lvl];
+  if (imagePath) {
+    imgWrap.innerHTML = '<img src="' + imagePath + '" alt="' + data.title + '">';
+  } else {
+    imgWrap.innerHTML = '<div class="lvl-placeholder"><div class="lvl-placeholder-text">' + data.title + '</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';
+  }
+  document.getElementById('lvl-badge').textContent = isLevelUp ? '🎉 Level Up!' : 'Level ' + lvl;
+  document.getElementById('lvl-badge').style.color = isLevelUp ? '#534AB7' : '#aaa';
+  document.getElementById('lvl-card-title').textContent = data.title;
+  document.getElementById('lvl-card-sub').textContent = data.sub;
+  document.getElementById('lvl-card-tier').textContent = TIER_NAMES[tierForLevel(lvl)];
+  document.getElementById('lvl-overlay').classList.add('open');
+};
+
+window.closeLvlOverlay = function() {
+  document.getElementById('lvl-overlay').classList.remove('open');
+};
+
+let pendingLevelUp = null;
 
 const LEVELS=[
   {title:'バカ外人',sub:'Stupid Foreigner',pts:0},
@@ -642,11 +732,14 @@ function computeDayPts(s) {
 
 function syncTodayHistory() {
   ensureHistory(state);
+  const prevLevel = getLvl(Math.max(0, state.totalPts));
   state.dayPts = computeDayPts(state);
   state.history.daily[today()] = Math.max(0, state.dayPts);
   state.weekPts = recalcWeekPts(state);
   state.totalPts = recalcTotalPts(state);
   state.streak = calcStreak(state);
+  const newLevel = getLvl(state.totalPts);
+  if (newLevel > prevLevel) pendingLevelUp = newLevel;
 }
 
 // Retroactively adjust points for a past day (up to 2 days back)
@@ -965,6 +1058,8 @@ function render(){
   const cur=LEVELS[lvl].pts,nxt=isMax?cur:LEVELS[lvl+1].pts;
   const titleEl=document.getElementById('level-title');
   titleEl.textContent=LEVELS[lvl].title;
+  titleEl.style.cursor='pointer';
+  titleEl.onclick=()=>window.openLvlOverlay(lvl, false);
   const tlen=LEVELS[lvl].title.length;
   titleEl.style.fontSize=tlen>8?'13px':tlen>6?'15px':'16px';
   document.getElementById('level-sub').textContent=LEVELS[lvl].sub;
@@ -1035,6 +1130,17 @@ function render(){
       if(pe)pe.textContent=actual<=0?'0 pts':actual+(actual<bp?' pts (capped)':' pts');
     });
   });
+
+  // Fire level-up overlay if pending
+  if (pendingLevelUp !== null) {
+    const lvlUp = pendingLevelUp;
+    pendingLevelUp = null;
+    const pl = document.getElementById('pl');
+    pl.classList.remove('pulse');
+    void pl.offsetWidth; // reflow to restart animation
+    pl.classList.add('pulse');
+    setTimeout(() => window.openLvlOverlay(lvlUp, true), 600);
+  }
 }
 </script>
 </body>

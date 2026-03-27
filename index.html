@@ -42,6 +42,8 @@
   .activity-sub { font-size: 12px; color: #888; margin-top: 1px; }
   .pts-badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: #f0f0eb; color: #888; white-space: nowrap; }
   .pts-badge.earned { background: #e1f5ee; color: #0F6E56; }
+  .pts-badge.locked { background: #f0f0eb; color: #bbb; }
+  .entry-pts.locked { color: #bbb; }
   .entry-row { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 0.5px solid rgba(0,0,0,0.08); }
   .entry-dot { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; margin-left: 7px; }
   .entry-name { font-size: 13px; color: #777; flex: 1; }
@@ -124,6 +126,8 @@
     .activity-sub { color: #999; }
     .pts-badge { background: #333; color: #aaa; }
     .pts-badge.earned { background: rgba(29,158,117,0.15); color: #3dbf8f; }
+    .pts-badge.locked { background: #333; color: #555; }
+    .entry-pts.locked { color: #555; }
     .check { border-color: #555; }
     .check.done { background: #1D9E75; border-color: #1D9E75; }
     .picker-panel { background: #222; border-color: rgba(255,255,255,0.08); }
@@ -159,6 +163,7 @@
     .drawer-panel { background: #1a1a1a; border-color: rgba(255,255,255,0.1); }
     .drawer-handle-bar { background: #555; }
     .drawer-title { color: #e8e8e4; }
+    #level-sub { color: #666; }
     .toggle-group { background: #222; }
     .toggle-opt { color: #999; }
     .toggle-opt.active { background: #333; color: #e8e8e4; box-shadow: none; }
@@ -195,14 +200,18 @@
   </div>
 
   <div class="stat-bar" style="margin-bottom:1.25rem">
-    <div class="bar-top">
-      <span id="level-title" style="font-size:16px;font-weight:600">外国人 Gaijin</span>
-      <span id="level-num" style="font-size:12px;color:#888">Level 0</span>
+    <div class="bar-top" style="margin-bottom:0">
+      <span id="level-title" style="font-size:16px;font-weight:600">バカ外人</span>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+        <span id="level-num" style="font-size:12px;color:#888">Level 0</span>
+        <span id="level-next" style="font-size:11px;color:#aaa">next: 20 pts</span>
+      </div>
     </div>
+    <div id="level-sub" style="font-size:11px;color:#999;margin-top:-4px;margin-bottom:4px"></div>
     <div class="progress-bg"><div class="progress-fill fill-level" id="pl" style="width:0%"></div></div>
     <div style="display:flex;justify-content:space-between;margin-top:4px">
       <span class="subtext"><strong id="total-pts">0</strong> pts total</span>
-      <span class="subtext" id="level-next">next: 20 pts</span>
+      <span class="subtext" id="level-remaining">— pts to next level</span>
     </div>
   </div>
 
@@ -299,13 +308,13 @@
           <span class="picker-opt-name">JP audio + JP subtitles</span>
           <span class="picker-opt-pts" id="ppts-media-jpsub">4 pts</span>
         </div>
-        <div class="picker-option" id="popt-media-ensub" onclick="addEntry('media','ensub',2,'JP audio + EN subtitles')">
+        <div class="picker-option" id="popt-media-ensub" onclick="addEntry('media','ensub',1,'JP audio + EN subtitles')">
           <span class="picker-opt-name">JP audio + EN subtitles</span>
-          <span class="picker-opt-pts" id="ppts-media-ensub">2 pts</span>
+          <span class="picker-opt-pts" id="ppts-media-ensub">1 pt</span>
         </div>
-        <div class="picker-option" id="popt-media-manga" onclick="addEntry('media','manga',3,'Manga')">
+        <div class="picker-option" id="popt-media-manga" onclick="addEntry('media','manga',2,'Manga')">
           <span class="picker-opt-name">Manga</span>
-          <span class="picker-opt-pts" id="ppts-media-manga">3 pts</span>
+          <span class="picker-opt-pts" id="ppts-media-manga">2 pts</span>
         </div>
       </div>
     </div>
@@ -380,14 +389,68 @@ const db = getDatabase(app);
 const stateRef = ref(db, 'tracker/state');
 
 const LEVELS=[
-  {title:'外国人 Gaijin',pts:0},{title:'観光客 Tourist',pts:20},{title:'学生 Student',pts:50},
-  {title:'旅人 Traveler',pts:140},{title:'話し手 Speaker',pts:330},{title:'常連 Regular',pts:720},
-  {title:'居住者 Resident',pts:1400},{title:'友人 Friend',pts:2500},{title:'市民 Citizen',pts:4200},
-  {title:'達人 Master',pts:6700},{title:'日本人 Japanese',pts:10000}
+  {title:'バカ外人',sub:'Stupid Foreigner',pts:0},
+  {title:'外人',sub:'Foreigner',pts:20},
+  {title:'観光客',sub:'Tourist',pts:42},
+  {title:'迷子',sub:'Lost Child',pts:66},
+  {title:'グーグルマップ',sub:'Google Maps',pts:93},
+  {title:'すみません',sub:'Excuse Me',pts:122},
+  {title:'お箸挑戦者',sub:'Chopstick Challenger',pts:154},
+  {title:'コンビニ常連',sub:'Convenience Store Regular',pts:189},
+  {title:'銭湯ビギナー',sub:'Public Bath Beginner',pts:228},
+  {title:'外国人',sub:'Foreign National',pts:271},
+  {title:'日本語上手ですね',sub:'Your Japanese Is So Good!',pts:318},
+  {title:'デュオリンゴ',sub:'Duolingo',pts:370},
+  {title:'平仮名',sub:'Hiragana',pts:427},
+  {title:'片仮名',sub:'Katakana',pts:490},
+  {title:'源氏教科書',sub:'Genki Textbook',pts:559},
+  {title:'アンキ職人',sub:'Anki Craftsman',pts:635},
+  {title:'て形の壁',sub:'The て-form Wall',pts:719},
+  {title:'漢字の海',sub:'Sea of Kanji',pts:811},
+  {title:'会話の先生',sub:'Conversation Tutor',pts:912},
+  {title:'初めての会話',sub:'First Real Conversation',pts:1023},
+  {title:'JLPT試験',sub:'JLPT Exam',pts:1145},
+  {title:'アンチ',sub:'Hater',pts:1280},
+  {title:'にわかファン',sub:'Casual Fan',pts:1428},
+  {title:'オタク',sub:'Otaku',pts:1591},
+  {title:'推し活',sub:'Devoted Stan',pts:1770},
+  {title:'異世界転生',sub:'Isekai Reincarnation',pts:1967},
+  {title:'名無し',sub:'The Nameless One',pts:2184},
+  {title:'見習い',sub:'Apprentice',pts:2422},
+  {title:'仲間集め',sub:'Assembling the Crew',pts:2684},
+  {title:'抜刀',sub:'Drawing the Sword',pts:2972},
+  {title:'主人公',sub:'Main Character',pts:3289},
+  {title:'足軽',sub:'Foot Soldier',pts:3638},
+  {title:'間者',sub:'Scout',pts:4022},
+  {title:'武士',sub:'Warrior',pts:4444},
+  {title:'侍',sub:'Samurai',pts:4909},
+  {title:'浪人',sub:'Rōnin',pts:5420},
+  {title:'剣士',sub:'Swordsman',pts:5982},
+  {title:'剣豪',sub:'Sword Master',pts:6600},
+  {title:'大将',sub:'General',pts:7280},
+  {title:'老中',sub:'Senior Councillor',pts:8028},
+  {title:'将軍',sub:'Shogun',pts:8851},
+  {title:'出家',sub:'The Renunciant',pts:9756},
+  {title:'修行者',sub:'Ascetic',pts:10752},
+  {title:'雲水',sub:'Clouds and Water',pts:11847},
+  {title:'禅僧',sub:'Zen Monk',pts:13052},
+  {title:'行者',sub:'Practitioner',pts:14377},
+  {title:'先生',sub:'Teacher',pts:15835},
+  {title:'師匠',sub:'Grand Master',pts:17439},
+  {title:'言語道断',sub:'Beyond Words',pts:19203},
+  {title:'悟り',sub:'Enlightenment',pts:21143},
+  {title:'博士',sub:'The Returned Scholar',pts:23277},
+  {title:'天狗',sub:'Mountain Demon',pts:25625},
+  {title:'妖怪使い',sub:'Spirit Commander',pts:28208},
+  {title:'陰陽師',sub:'Spirit Diviner',pts:31049},
+  {title:'鬼',sub:'Demon of Discipline',pts:34174},
+  {title:'龍',sub:'Dragon',pts:37611},
+  {title:'言霊',sub:'Spirit of Language',pts:41392},
+  {title:'八百万の神',sub:'One of Eight Million Gods',pts:45551},
 ];
 const BASE={anki:1,renshuu:1,grammar:1,crash:7,preply:3};
 const CAPS={tokini:8,media:9};
-const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:2,manga:3}};
+const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:1,manga:2}};
 
 function today(){
   const d=new Date();
@@ -559,10 +622,27 @@ onValue(stateRef, (snapshot) => {
 });
 
 function entrySum(key){return(state.entries[key]||[]).reduce((t,e)=>t+e.pts,0);}
-function addPts(n){state.dayPts+=n;state.weekPts+=n;state.totalPts+=n;}
+
+// Compute what dayPts should be given current checked/entries state.
+// Anki = 1 pt always (not gated).
+// All other activities only earn pts if Anki is checked.
+function computeDayPts(s) {
+  const ankiDone = !!s.checked.anki;
+  let pts = ankiDone ? BASE.anki : 0;
+  if (ankiDone) {
+    ['renshuu','grammar','crash','preply'].forEach(k => {
+      if (s.checked[k]) pts += BASE[k];
+    });
+    ['tokini','media'].forEach(key => {
+      pts += (s.entries[key] || []).reduce((t,e) => t+e.pts, 0);
+    });
+  }
+  return pts;
+}
 
 function syncTodayHistory() {
   ensureHistory(state);
+  state.dayPts = computeDayPts(state);
   state.history.daily[today()] = Math.max(0, state.dayPts);
   state.weekPts = recalcWeekPts(state);
   state.totalPts = recalcTotalPts(state);
@@ -576,20 +656,18 @@ window.adjustDay = function(dateStr, newPts) {
   ensureHistory(state);
 
   if (dateStr === today()) {
-    // For today, update dayPts and sync
-    state.dayPts = val;
-    state.history.daily[today()] = val;
+    // For today, recompute from actual state rather than overriding
+    syncTodayHistory();
   } else {
     state.history.daily[dateStr] = val;
+    // Recalculate everything from history
+    state.weekPts = recalcWeekPts(state);
+    state.totalPts = recalcTotalPts(state);
+    state.streak = calcStreak(state);
+    // Rebuild weekly history for any affected week
+    const affectedWk = weekKey(new Date(dateStr + 'T12:00:00'));
+    recalcWeeklyFromDaily(state, affectedWk);
   }
-
-  // Recalculate everything from history
-  state.weekPts = recalcWeekPts(state);
-  state.totalPts = recalcTotalPts(state);
-  state.streak = calcStreak(state);
-  // Rebuild weekly history for any affected week
-  const affectedWk = weekKey(new Date(dateStr + 'T12:00:00'));
-  recalcWeeklyFromDaily(state, affectedWk);
 
   scheduleSave(); render(); renderChart();
 };
@@ -632,9 +710,7 @@ window.startEditBar = function(dateKey, svgX, svgY, currentVal) {
 };
 
 window.toggleSimple = function(key) {
-  const was=state.checked[key];
-  if(was){state.checked[key]=false;addPts(-BASE[key]);}
-  else{state.checked[key]=true;addPts(BASE[key]);}
+  state.checked[key] = !state.checked[key];
   syncTodayHistory();
   scheduleSave();render();renderChart();
 };
@@ -652,14 +728,12 @@ window.addEntry = function(key,type,basePts,label) {
   if(remaining<=0)return;
   const actual=Math.min(basePts,remaining);
   state.entries[key].push({type,label,pts:actual});
-  addPts(actual);
   syncTodayHistory();
   document.getElementById('picker-'+key).style.display='none';
   scheduleSave();render();renderChart();
 };
 
 window.removeEntry = function(key,idx) {
-  addPts(-state.entries[key][idx].pts);
   state.entries[key].splice(idx,1);
   syncTodayHistory();
   scheduleSave();render();renderChart();
@@ -671,7 +745,6 @@ window.updateGoal = function() {
 };
 
 window.resetDay = function() {
-  addPts(-state.dayPts);
   state.checked={};state.entries={tokini:[],media:[]};state.dayPts=0;
   syncTodayHistory();
   scheduleSave();render();renderChart();
@@ -890,19 +963,40 @@ function render(){
 
   const lvl=getLvl(tp),isMax=lvl>=LEVELS.length-1;
   const cur=LEVELS[lvl].pts,nxt=isMax?cur:LEVELS[lvl+1].pts;
-  document.getElementById('level-title').textContent=LEVELS[lvl].title;
+  const titleEl=document.getElementById('level-title');
+  titleEl.textContent=LEVELS[lvl].title;
+  const tlen=LEVELS[lvl].title.length;
+  titleEl.style.fontSize=tlen>8?'13px':tlen>6?'15px':'16px';
+  document.getElementById('level-sub').textContent=LEVELS[lvl].sub;
   document.getElementById('level-num').textContent='Level '+lvl;
   document.getElementById('pl').style.width=(isMax?100:Math.min(100,Math.round((tp-cur)/(nxt-cur)*100)))+'%';
-  document.getElementById('level-next').textContent=isMax?'max level':'next: '+nxt+' pts';
+  document.getElementById('level-next').textContent=isMax?'':('next: '+nxt+' pts');
+  document.getElementById('level-remaining').textContent=isMax?'max level':((nxt-tp)+' pts to next level');
+
+  const ankiDone = !!state.checked.anki;
+  const LOCK = ' 🔒';
 
   ['anki','renshuu','grammar','crash','preply'].forEach(k=>{
     const done=state.checked[k];
+    const gated = k !== 'anki';
+    const locked = gated && !ankiDone;
     document.getElementById('check-'+k).className='check'+(done?' done':'');
-    document.getElementById('badge-'+k).className='pts-badge'+(done?' earned':'');
+    const badge = document.getElementById('badge-'+k);
+    const basePts = '+'+BASE[k]+' pt'+(BASE[k]===1?'':'s');
+    if (done && !locked) {
+      badge.className = 'pts-badge earned';
+      badge.textContent = basePts;
+    } else if (locked) {
+      badge.className = 'pts-badge locked';
+      badge.textContent = basePts + LOCK;
+    } else {
+      badge.className = 'pts-badge';
+      badge.textContent = basePts;
+    }
   });
 
   document.getElementById('habit-dot').className='habit-dot'+(state.checked.anki?' active':'');
-  document.getElementById('habit-text').textContent=state.checked.anki?'Minimum daily goal reached':'Complete Anki to hit your minimum daily goal';
+  document.getElementById('habit-text').textContent=state.checked.anki?'Minimum daily goal reached — other points now unlocked':'Complete Anki to unlock points for all other activities';
 
   ['tokini','media'].forEach(key=>{
     const cap=CAPS[key],entries=state.entries[key]||[],spent=entrySum(key),remaining=cap-spent;
@@ -912,12 +1006,15 @@ function render(){
     entries.forEach((e,i)=>{
       const row=document.createElement('div');
       row.className='entry-row';
-      row.innerHTML='<div class="entry-dot"></div><span class="entry-name">'+e.label+'</span><span class="entry-pts">+'+e.pts+' pts</span><span class="entry-remove" onclick="removeEntry(\''+key+'\','+i+')">×</span>';
+      const ptsClass = ankiDone ? 'entry-pts' : 'entry-pts locked';
+      const ptsText = ankiDone ? '+'+e.pts+' pts' : '+'+e.pts+' pts' + LOCK;
+      row.innerHTML='<div class="entry-dot"></div><span class="entry-name">'+e.label+'</span><span class="'+ptsClass+'">'+ptsText+'</span><span class="entry-remove" onclick="removeEntry(\''+key+'\','+i+')">×</span>';
       container.appendChild(row);
     });
     const tb=document.getElementById(key+'-total-badge');
     tb.style.visibility=spent>0?'visible':'hidden';
-    tb.textContent=spent+' pts';
+    tb.textContent = spent + ' pts' + (!ankiDone && spent > 0 ? LOCK : '');
+    tb.className = 'pts-badge' + (ankiDone && spent > 0 ? ' earned' : spent > 0 ? ' locked' : '');
     const addRow=document.getElementById(key+'-add-row');
     const remBadge=document.getElementById(key+'-rem-badge');
     if(remaining<=0){

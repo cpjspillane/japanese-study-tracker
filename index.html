@@ -455,7 +455,7 @@ function tierForLevel(lvl) {
   return 5;
 }
 
-function openLvlOverlay(lvl, isLevelUp) {
+window.openLvlOverlay = function(lvl, isLevelUp) {
   const data = LEVELS[lvl];
   const imgWrap = document.getElementById('lvl-img-wrap');
   const imagePath = LEVEL_IMAGES[lvl];
@@ -470,7 +470,7 @@ function openLvlOverlay(lvl, isLevelUp) {
   document.getElementById('lvl-card-sub').textContent = data.sub;
   document.getElementById('lvl-card-tier').textContent = TIER_NAMES[tierForLevel(lvl)];
   document.getElementById('lvl-overlay').classList.add('open');
-}
+};
 
 window.closeLvlOverlay = function() {
   document.getElementById('lvl-overlay').classList.remove('open');
@@ -1057,7 +1057,7 @@ function render(){
   const titleEl=document.getElementById('level-title');
   titleEl.textContent=LEVELS[lvl].title;
   titleEl.style.cursor='pointer';
-  titleEl.onclick=()=>openLvlOverlay(lvl, false);
+  titleEl.onclick=()=>window.openLvlOverlay(lvl, false);
   const tlen=LEVELS[lvl].title.length;
   titleEl.style.fontSize=tlen>8?'13px':tlen>6?'15px':'16px';
   document.getElementById('level-sub').textContent=LEVELS[lvl].sub;
@@ -1137,7 +1137,7 @@ function render(){
     pl.classList.remove('pulse');
     void pl.offsetWidth; // reflow to restart animation
     pl.classList.add('pulse');
-    setTimeout(() => openLvlOverlay(lvlUp, true), 600);
+    setTimeout(() => window.openLvlOverlay(lvlUp, true), 600);
   }
 }
 </script>

@@ -431,52 +431,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const stateRef = ref(db, 'tracker/state');
 
-const LEVEL_IMAGES = {
-  0: 'images/levels/lvl-00.png',
-  1: 'images/levels/lvl-01.png',
-  // add more as art is completed
-};
-
-const TIER_NAMES = [
-  'The Tourist',      // 0–10
-  'The Student',      // 11–20
-  'The Samurai Anime Arc', // 21–30
-  'The Samurai Saga', // 31–40
-  'The Ascetic Path', // 41–50
-  'Supernatural Mastery', // 51–57
-];
-
-function tierForLevel(lvl) {
-  if (lvl <= 10) return 0;
-  if (lvl <= 20) return 1;
-  if (lvl <= 30) return 2;
-  if (lvl <= 40) return 3;
-  if (lvl <= 50) return 4;
-  return 5;
-}
-
-window.openLvlOverlay = function(lvl, isLevelUp) {
-  const data = LEVELS[lvl];
-  const imgWrap = document.getElementById('lvl-img-wrap');
-  const imagePath = LEVEL_IMAGES[lvl];
-  if (imagePath) {
-    imgWrap.innerHTML = '<img src="' + imagePath + '" alt="' + data.title + '">';
-  } else {
-    imgWrap.innerHTML = '<div class="lvl-placeholder"><div class="lvl-placeholder-text">' + data.title + '</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';
-  }
-  document.getElementById('lvl-badge').textContent = isLevelUp ? '🎉 Level Up!' : 'Level ' + lvl;
-  document.getElementById('lvl-badge').style.color = isLevelUp ? '#534AB7' : '#aaa';
-  document.getElementById('lvl-card-title').textContent = data.title;
-  document.getElementById('lvl-card-sub').textContent = data.sub;
-  document.getElementById('lvl-card-tier').textContent = TIER_NAMES[tierForLevel(lvl)];
-  document.getElementById('lvl-overlay').classList.add('open');
-};
-
-window.closeLvlOverlay = function() {
-  document.getElementById('lvl-overlay').classList.remove('open');
-};
-
-let pendingLevelUp = null;
+const LEVELS=[
   {title:'バカ外人',sub:'Stupid Foreigner',pts:0},
   {title:'外人',sub:'Foreigner',pts:20},
   {title:'観光客',sub:'Tourist',pts:42},
@@ -539,6 +494,53 @@ let pendingLevelUp = null;
 const BASE={anki:1,renshuu:1,grammar:1,crash:7,preply:3};
 const CAPS={tokini:8,media:9};
 const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:1,manga:2}};
+
+const LEVEL_IMAGES = {
+  0: 'images/levels/lvl-00.png',
+  1: 'images/levels/lvl-01.png',
+  // add more as art is completed
+};
+
+const TIER_NAMES = [
+  'The Tourist',      // 0–10
+  'The Student',      // 11–20
+  'The Samurai Anime Arc', // 21–30
+  'The Samurai Saga', // 31–40
+  'The Ascetic Path', // 41–50
+  'Supernatural Mastery', // 51–57
+];
+
+function tierForLevel(lvl) {
+  if (lvl <= 10) return 0;
+  if (lvl <= 20) return 1;
+  if (lvl <= 30) return 2;
+  if (lvl <= 40) return 3;
+  if (lvl <= 50) return 4;
+  return 5;
+}
+
+window.openLvlOverlay = function(lvl, isLevelUp) {
+  const data = LEVELS[lvl];
+  const imgWrap = document.getElementById('lvl-img-wrap');
+  const imagePath = LEVEL_IMAGES[lvl];
+  if (imagePath) {
+    imgWrap.innerHTML = '<img src="' + imagePath + '" alt="' + data.title + '">';
+  } else {
+    imgWrap.innerHTML = '<div class="lvl-placeholder"><div class="lvl-placeholder-text">' + data.title + '</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';
+  }
+  document.getElementById('lvl-badge').textContent = isLevelUp ? '🎉 Level Up!' : 'Level ' + lvl;
+  document.getElementById('lvl-badge').style.color = isLevelUp ? '#534AB7' : '#aaa';
+  document.getElementById('lvl-card-title').textContent = data.title;
+  document.getElementById('lvl-card-sub').textContent = data.sub;
+  document.getElementById('lvl-card-tier').textContent = TIER_NAMES[tierForLevel(lvl)];
+  document.getElementById('lvl-overlay').classList.add('open');
+};
+
+window.closeLvlOverlay = function() {
+  document.getElementById('lvl-overlay').classList.remove('open');
+};
+
+let pendingLevelUp = null;
 
 function today(){
   const d=new Date();

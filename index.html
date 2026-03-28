@@ -361,7 +361,7 @@ const BUCKETS = [
     options: [{ id: 'anki', name: 'Anki flashcards', sub: 'Reviews + import new items to Renshuu', pts: 1, tier: 0 }]
   },
   {
-    id: 'textbook', type: 'multi', sectionLabel: 'Daily checklist', tier: 0,
+    id: 'textbook', type: 'multi', label: 'Textbook study', sectionLabel: 'Daily checklist', tier: 0,
     tierCaps: { 0:8,1:8,2:8,3:8,4:8,5:8 },
     options: [
       { id: 'video', name: 'Video or challenge', pts: 4, tier: 0 },
@@ -370,7 +370,7 @@ const BUCKETS = [
     ]
   },
   {
-    id: 'quizzes', type: 'multi', sectionLabel: null, tier: 0,
+    id: 'quizzes', type: 'multi', label: 'Quizzes', sectionLabel: null, tier: 0,
     tierCaps: { 0:2,1:2,2:2,3:2,4:2,5:2 },
     options: [
       { id: 'renshuu', name: 'Renshuu', pts: 1, tier: 0 },
@@ -378,7 +378,7 @@ const BUCKETS = [
     ]
   },
   {
-    id: 'immersion', type: 'multi', sectionLabel: null, tier: 0,
+    id: 'immersion', type: 'multi', label: 'Immersion / media', sectionLabel: null, tier: 0,
     tierCaps: { 0:3,1:5,2:11,3:21,4:21,5:21 },
     options: [
       { id: 'novels', name: 'Native novels (per chapter)', pts: 8, tier: 3 },
@@ -391,7 +391,7 @@ const BUCKETS = [
     ]
   },
   {
-    id: 'writing', type: 'multi', sectionLabel: null, tier: 1,
+    id: 'writing', type: 'multi', label: 'Writing', sectionLabel: null, tier: 1,
     tierCaps: { 1:3,2:6,3:9,4:9,5:9 },
     options: [
       { id: 'freewrite', name: 'Free writing / journal', pts: 5, tier: 2 },
@@ -399,7 +399,7 @@ const BUCKETS = [
     ]
   },
   {
-    id: 'teachback', type: 'multi', sectionLabel: null, tier: 2,
+    id: 'teachback', type: 'multi', label: 'Teach-back', sectionLabel: null, tier: 2,
     tierCaps: { 2:4,3:4,4:4,5:4 },
     options: [
       { id: 'teachback', name: 'Teach-back session', pts: 4, tier: 2 },

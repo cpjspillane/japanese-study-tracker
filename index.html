@@ -152,6 +152,15 @@
 
 
   @media (prefers-color-scheme: dark) {
+    .lvl-card { background: #2a2a2a; }
+    .lvl-placeholder { background: #222; }
+    .lvl-placeholder-text { color: #444; }
+    .lvl-placeholder-msg { color: #555; }
+    .lvl-card-title { color: #e8e8e4; }
+    .lvl-card-sub { color: #777; }
+    .lvl-card-tier { color: #555; }
+    .lvl-dismiss { color: #555; }
+  }
     body { background: #1a1a1a; color: #e8e8e4; }
     h2 { color: #e8e8e4; }
     .date-label { color: #777; }
@@ -470,6 +479,53 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const stateRef = ref(db, 'tracker/state');
+
+const LEVEL_IMAGES = {
+  0: 'images/levels/lvl-00.png',
+  1: 'images/levels/lvl-01.png',
+  // add more as art is completed
+};
+
+const TIER_NAMES = [
+  'The Tourist',      // 0–10
+  'The Student',      // 11–20
+  'The Samurai Anime Arc', // 21–30
+  'The Samurai Saga', // 31–40
+  'The Ascetic Path', // 41–50
+  'Supernatural Mastery', // 51–57
+];
+
+function tierForLevel(lvl) {
+  if (lvl <= 10) return 0;
+  if (lvl <= 20) return 1;
+  if (lvl <= 30) return 2;
+  if (lvl <= 40) return 3;
+  if (lvl <= 50) return 4;
+  return 5;
+}
+
+window.openLvlOverlay = function(lvl, isLevelUp) {
+  const data = LEVELS[lvl];
+  const imgWrap = document.getElementById('lvl-img-wrap');
+  const imagePath = LEVEL_IMAGES[lvl];
+  if (imagePath) {
+    imgWrap.innerHTML = '<img src="' + imagePath + '" alt="' + data.title + '">';
+  } else {
+    imgWrap.innerHTML = '<div class="lvl-placeholder"><div class="lvl-placeholder-text">' + data.title + '</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';
+  }
+  document.getElementById('lvl-badge').textContent = isLevelUp ? '🎉 Level Up!' : 'Level ' + lvl;
+  document.getElementById('lvl-badge').style.color = isLevelUp ? '#534AB7' : '#aaa';
+  document.getElementById('lvl-card-title').textContent = data.title;
+  document.getElementById('lvl-card-sub').textContent = data.sub;
+  document.getElementById('lvl-card-tier').textContent = TIER_NAMES[tierForLevel(lvl)];
+  document.getElementById('lvl-overlay').classList.add('open');
+};
+
+window.closeLvlOverlay = function() {
+  document.getElementById('lvl-overlay').classList.remove('open');
+};
+
+let pendingLevelUp = null;
 
 const LEVELS=[
   {title:'バカ外人',sub:'Stupid Foreigner',pts:0},

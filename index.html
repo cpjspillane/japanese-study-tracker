@@ -70,11 +70,10 @@
   .goal-label { font-size: 13px; color: #888; }
   .reset-btn { margin-top: 8px; width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #ddd; background: transparent; color: #999; font-size: 13px; cursor: pointer; }
   .reset-btn:hover { background: #f5f5f0; }
-
-  /* Metrics button */
   .metrics-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 1.25rem; padding: 11px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.12); background: #fff; color: #1a1a1a; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
   .metrics-btn:hover { background: #f9f9f6; }
   .metrics-btn svg { flex-shrink: 0; }
+  .metrics-btn + .metrics-btn { margin-top: 6px; }
 
   /* Drawer */
   .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 100; }
@@ -125,7 +124,7 @@
   .lvl-card-tier { font-size: 11px; color: #bbb; }
   .lvl-dismiss { font-size: 12px; color: #bbb; text-align: center; padding: 0.75rem; cursor: pointer; }
 
-  /* Gallery drawer */
+  /* Gallery */
   .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding-bottom: 1rem; }
   .gallery-tier-label { grid-column: 1 / -1; font-size: 11px; font-weight: 600; color: #999; letter-spacing: 0.07em; text-transform: uppercase; margin-top: 8px; margin-bottom: -2px; }
   .gallery-tier-label:first-child { margin-top: 0; }
@@ -149,7 +148,6 @@
   /* Progress bar level-up pulse */
   @keyframes lvl-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
   .fill-level.pulse { animation: lvl-pulse 0.4s ease 2; }
-
 
   @media (prefers-color-scheme: dark) {
     body { background: #1a1a1a; color: #e8e8e4; }
@@ -194,9 +192,6 @@
     .goal-label { color: #999; }
     .sync-bar { background: #222; border-color: rgba(255,255,255,0.08); }
     .sync-text { color: #777; }
-    .sync-dot.synced { background: #1D9E75; }
-    .sync-dot.syncing { background: #EF9F27; }
-    .sync-dot.error { background: #E24B4A; }
     .reset-btn { border-color: rgba(255,255,255,0.2); color: #999; }
     .reset-btn:hover { background: rgba(255,255,255,0.05); }
     .metrics-btn { background: #2a2a2a; border-color: rgba(255,255,255,0.1); color: #e8e8e4; }
@@ -270,138 +265,11 @@
     </div>
   </div>
 
-  <div class="section-label">Daily checklist</div>
-
-  <div class="card">
-    <div class="activity-row" onclick="toggleSimple('anki')">
-      <div class="check" id="check-anki"></div>
-      <div class="activity-info">
-        <div class="activity-name">Anki flashcards</div>
-        <div class="activity-sub">Reviews + import new items to Renshuu</div>
-      </div>
-      <div class="pts-badge" id="badge-anki">+1 pt</div>
-    </div>
-    <div class="habit-row">
-      <div class="habit-dot" id="habit-dot"></div>
-      <div class="habit-text" id="habit-text">Complete Anki to hit your minimum daily goal</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="activity-name-plain">
-      <div class="check-spacer"></div>
-      <div class="activity-info">
-        <div class="activity-name">Tokini Andy / Genki content</div>
-        <div class="activity-sub" id="tokini-sublabel">cap: 8 pts/day</div>
-      </div>
-      <div class="pts-badge earned" id="tokini-total-badge" style="visibility:hidden">0 pts</div>
-    </div>
-    <div id="tokini-entries"></div>
-    <div class="add-row" id="tokini-add-row" onclick="togglePicker('tokini')">
-      <div class="add-icon">+</div>
-      <span class="add-label">Add activity</span>
-      <span class="pts-badge" id="tokini-rem-badge">up to +4 pts</span>
-    </div>
-    <div id="picker-tokini" style="display:none">
-      <div class="picker-panel">
-        <div class="picker-option" id="popt-tokini-video" onclick="addEntry('tokini','video',4,'Video or challenge')">
-          <span class="picker-opt-name">Video or challenge</span>
-          <span class="picker-opt-pts" id="ppts-tokini-video">4 pts</span>
-        </div>
-        <div class="picker-option" id="popt-tokini-workbook" onclick="addEntry('tokini','workbook',4,'Genki workbook exercises')">
-          <span class="picker-opt-name">Genki workbook exercises</span>
-          <span class="picker-opt-pts" id="ppts-tokini-workbook">4 pts</span>
-        </div>
-        <div class="picker-option" id="popt-tokini-kanji" onclick="addEntry('tokini','kanji',4,'Kanji reading video')">
-          <span class="picker-opt-name">Kanji reading video</span>
-          <span class="picker-opt-pts" id="ppts-tokini-kanji">4 pts</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="activity-row" onclick="toggleSimple('renshuu')">
-      <div class="check" id="check-renshuu"></div>
-      <div class="activity-info">
-        <div class="activity-name">Renshuu quizzes</div>
-        <div class="activity-sub">Up to ~100 review terms</div>
-      </div>
-      <div class="pts-badge" id="badge-renshuu">+1 pt</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="activity-row" onclick="toggleSimple('grammar')">
-      <div class="check" id="check-grammar"></div>
-      <div class="activity-info">
-        <div class="activity-name">Grammar quiz</div>
-        <div class="activity-sub">Daily grammar review</div>
-      </div>
-      <div class="pts-badge" id="badge-grammar">+1 pt</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="activity-name-plain">
-      <div class="check-spacer"></div>
-      <div class="activity-info">
-        <div class="activity-name">Immersion / media</div>
-        <div class="activity-sub" id="media-sublabel">cap: 9 pts/day</div>
-      </div>
-      <div class="pts-badge earned" id="media-total-badge" style="visibility:hidden">0 pts</div>
-    </div>
-    <div id="media-entries"></div>
-    <div class="add-row" id="media-add-row" onclick="togglePicker('media')">
-      <div class="add-icon">+</div>
-      <span class="add-label">Add activity</span>
-      <span class="pts-badge" id="media-rem-badge">up to +4 pts</span>
-    </div>
-    <div id="picker-media" style="display:none">
-      <div class="picker-panel">
-        <div class="picker-option" id="popt-media-jpsub" onclick="addEntry('media','jpsub',4,'JP audio + JP subtitles')">
-          <span class="picker-opt-name">JP audio + JP subtitles</span>
-          <span class="picker-opt-pts" id="ppts-media-jpsub">4 pts</span>
-        </div>
-        <div class="picker-option" id="popt-media-ensub" onclick="addEntry('media','ensub',1,'JP audio + EN subtitles')">
-          <span class="picker-opt-name">JP audio + EN subtitles</span>
-          <span class="picker-opt-pts" id="ppts-media-ensub">1 pt</span>
-        </div>
-        <div class="picker-option" id="popt-media-manga" onclick="addEntry('media','manga',2,'Manga')">
-          <span class="picker-opt-name">Manga</span>
-          <span class="picker-opt-pts" id="ppts-media-manga">2 pts</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-label">Weekly sessions</div>
-
-  <div class="card">
-    <div class="activity-row" onclick="toggleSimple('crash')">
-      <div class="check" id="check-crash"></div>
-      <div class="activity-info">
-        <div class="activity-name">Weekly crash session</div>
-        <div class="activity-sub">1 hour focused Genki prep + bonus</div>
-      </div>
-      <div class="pts-badge" id="badge-crash">+7 pts</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="activity-row" onclick="toggleSimple('preply')">
-      <div class="check" id="check-preply"></div>
-      <div class="activity-info">
-        <div class="activity-name">Preply session with Yuu-san</div>
-        <div class="activity-sub">Weekly lesson</div>
-      </div>
-      <div class="pts-badge" id="badge-preply">+3 pts</div>
-    </div>
-  </div>
+  <div id="checklist-container"></div>
 
   <div class="goal-row">
     <span class="goal-label">Weekly stretch goal:</span>
-    <input type="number" class="goal-input" id="goal-input" value="50" min="10" max="150" onchange="updateGoal()">
+    <input type="number" class="goal-input" id="goal-input" value="50" min="10" max="500" onchange="updateGoal()">
     <span class="goal-label">pts</span>
   </div>
 
@@ -471,682 +339,282 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const stateRef = ref(db, 'tracker/state');
 
+// ─── LEVELS ───
 const LEVELS=[
-  {title:'バカ外人',sub:'Stupid Foreigner',pts:0},
-  {title:'外人',sub:'Foreigner',pts:20},
-  {title:'観光客',sub:'Tourist',pts:42},
-  {title:'迷子',sub:'Lost Child',pts:66},
-  {title:'グーグルマップ',sub:'Google Maps',pts:93},
-  {title:'すみません',sub:'Excuse Me',pts:122},
-  {title:'お箸挑戦者',sub:'Chopstick Challenger',pts:154},
-  {title:'コンビニ常連',sub:'Convenience Store Regular',pts:189},
-  {title:'銭湯ビギナー',sub:'Public Bath Beginner',pts:228},
-  {title:'外国人',sub:'Foreign National',pts:271},
-  {title:'日本語上手ですね',sub:'Your Japanese Is So Good!',pts:318},
-  {title:'デュオリンゴ',sub:'Duolingo',pts:370},
-  {title:'平仮名',sub:'Hiragana',pts:427},
-  {title:'片仮名',sub:'Katakana',pts:490},
-  {title:'源氏教科書',sub:'Genki Textbook',pts:559},
-  {title:'アンキ職人',sub:'Anki Craftsman',pts:635},
-  {title:'て形の壁',sub:'The て-form Wall',pts:719},
-  {title:'漢字の海',sub:'Sea of Kanji',pts:811},
-  {title:'会話の先生',sub:'Conversation Tutor',pts:912},
-  {title:'初めての会話',sub:'First Real Conversation',pts:1023},
-  {title:'JLPT試験',sub:'JLPT Exam',pts:1145},
-  {title:'アンチ',sub:'Hater',pts:1280},
-  {title:'にわかファン',sub:'Casual Fan',pts:1428},
-  {title:'オタク',sub:'Otaku',pts:1591},
-  {title:'推し活',sub:'Devoted Stan',pts:1770},
-  {title:'異世界転生',sub:'Isekai Reincarnation',pts:1967},
-  {title:'名無し',sub:'The Nameless One',pts:2184},
-  {title:'見習い',sub:'Apprentice',pts:2422},
-  {title:'仲間集め',sub:'Assembling the Crew',pts:2684},
-  {title:'抜刀',sub:'Drawing the Sword',pts:2972},
-  {title:'主人公',sub:'Main Character',pts:3289},
-  {title:'足軽',sub:'Foot Soldier',pts:3638},
-  {title:'間者',sub:'Scout',pts:4022},
-  {title:'武士',sub:'Warrior',pts:4444},
-  {title:'侍',sub:'Samurai',pts:4909},
-  {title:'浪人',sub:'Rōnin',pts:5420},
-  {title:'剣士',sub:'Swordsman',pts:5982},
-  {title:'剣豪',sub:'Sword Master',pts:6600},
-  {title:'大将',sub:'General',pts:7280},
-  {title:'老中',sub:'Senior Councillor',pts:8028},
-  {title:'将軍',sub:'Shogun',pts:8851},
-  {title:'出家',sub:'The Renunciant',pts:9756},
-  {title:'修行者',sub:'Ascetic',pts:10752},
-  {title:'雲水',sub:'Clouds and Water',pts:11847},
-  {title:'禅僧',sub:'Zen Monk',pts:13052},
-  {title:'行者',sub:'Practitioner',pts:14377},
-  {title:'先生',sub:'Teacher',pts:15835},
-  {title:'師匠',sub:'Grand Master',pts:17439},
-  {title:'言語道断',sub:'Beyond Words',pts:19203},
-  {title:'悟り',sub:'Enlightenment',pts:21143},
-  {title:'博士',sub:'The Returned Scholar',pts:23277},
-  {title:'天狗',sub:'Mountain Demon',pts:25625},
-  {title:'妖怪使い',sub:'Spirit Commander',pts:28208},
-  {title:'陰陽師',sub:'Spirit Diviner',pts:31049},
-  {title:'鬼',sub:'Demon of Discipline',pts:34174},
-  {title:'龍',sub:'Dragon',pts:37611},
-  {title:'言霊',sub:'Spirit of Language',pts:41392},
-  {title:'八百万の神',sub:'One of Eight Million Gods',pts:45551},
-];
-const BASE={anki:1,renshuu:1,grammar:1,crash:7,preply:3};
-const CAPS={tokini:8,media:9};
-const OPT_PTS={tokini:{video:4,workbook:4,kanji:4},media:{jpsub:4,ensub:1,manga:2}};
-
-function levelImagePath(lvl) {
-  return 'images/lvl-' + String(lvl).padStart(2, '0') + '.png';
-}
-
-const TIER_NAMES = [
-  'The Tourist',      // 0–10
-  'The Student',      // 11–20
-  'The Samurai Anime Arc', // 21–30
-  'The Samurai Saga', // 31–40
-  'The Ascetic Path', // 41–50
-  'Supernatural Mastery', // 51–57
+  {title:'バカ外人',sub:'Stupid Foreigner',pts:0},{title:'外人',sub:'Foreigner',pts:20},{title:'観光客',sub:'Tourist',pts:42},{title:'迷子',sub:'Lost Child',pts:66},{title:'グーグルマップ',sub:'Google Maps',pts:93},{title:'すみません',sub:'Excuse Me',pts:122},{title:'お箸挑戦者',sub:'Chopstick Challenger',pts:154},{title:'コンビニ常連',sub:'Convenience Store Regular',pts:189},{title:'銭湯ビギナー',sub:'Public Bath Beginner',pts:228},{title:'外国人',sub:'Foreign National',pts:271},{title:'日本語上手ですね',sub:'Your Japanese Is So Good!',pts:318},
+  {title:'デュオリンゴ',sub:'Duolingo',pts:370},{title:'平仮名',sub:'Hiragana',pts:427},{title:'片仮名',sub:'Katakana',pts:490},{title:'源氏教科書',sub:'Genki Textbook',pts:559},{title:'アンキ職人',sub:'Anki Craftsman',pts:635},{title:'て形の壁',sub:'The て-form Wall',pts:719},{title:'漢字の海',sub:'Sea of Kanji',pts:811},{title:'会話の先生',sub:'Conversation Tutor',pts:912},{title:'初めての会話',sub:'First Real Conversation',pts:1023},{title:'JLPT試験',sub:'JLPT Exam',pts:1145},
+  {title:'アンチ',sub:'Hater',pts:1280},{title:'にわかファン',sub:'Casual Fan',pts:1428},{title:'オタク',sub:'Otaku',pts:1591},{title:'推し活',sub:'Devoted Stan',pts:1770},{title:'異世界転生',sub:'Isekai Reincarnation',pts:1967},{title:'名無し',sub:'The Nameless One',pts:2184},{title:'見習い',sub:'Apprentice',pts:2422},{title:'仲間集め',sub:'Assembling the Crew',pts:2684},{title:'抜刀',sub:'Drawing the Sword',pts:2972},{title:'主人公',sub:'Main Character',pts:3289},
+  {title:'足軽',sub:'Foot Soldier',pts:3638},{title:'間者',sub:'Scout',pts:4022},{title:'武士',sub:'Warrior',pts:4444},{title:'侍',sub:'Samurai',pts:4909},{title:'浪人',sub:'Rōnin',pts:5420},{title:'剣士',sub:'Swordsman',pts:5982},{title:'剣豪',sub:'Sword Master',pts:6600},{title:'大将',sub:'General',pts:7280},{title:'老中',sub:'Senior Councillor',pts:8028},{title:'将軍',sub:'Shogun',pts:8851},
+  {title:'出家',sub:'The Renunciant',pts:9756},{title:'修行者',sub:'Ascetic',pts:10752},{title:'雲水',sub:'Clouds and Water',pts:11847},{title:'禅僧',sub:'Zen Monk',pts:13052},{title:'行者',sub:'Practitioner',pts:14377},{title:'先生',sub:'Teacher',pts:15835},{title:'師匠',sub:'Grand Master',pts:17439},{title:'言語道断',sub:'Beyond Words',pts:19203},{title:'悟り',sub:'Enlightenment',pts:21143},{title:'博士',sub:'The Returned Scholar',pts:23277},
+  {title:'天狗',sub:'Mountain Demon',pts:25625},{title:'妖怪使い',sub:'Spirit Commander',pts:28208},{title:'陰陽師',sub:'Spirit Diviner',pts:31049},{title:'鬼',sub:'Demon of Discipline',pts:34174},{title:'龍',sub:'Dragon',pts:37611},{title:'言霊',sub:'Spirit of Language',pts:41392},{title:'八百万の神',sub:'One of Eight Million Gods',pts:45551},
 ];
 
-function tierForLevel(lvl) {
-  if (lvl <= 10) return 0;
-  if (lvl <= 20) return 1;
-  if (lvl <= 30) return 2;
-  if (lvl <= 40) return 3;
-  if (lvl <= 50) return 4;
-  return 5;
+const TIER_NAMES = ['The Tourist','The Student','The Samurai Anime Arc','The Samurai Saga','The Ascetic Path','Supernatural Mastery'];
+function tierForLevel(lvl) { if(lvl<=10)return 0;if(lvl<=20)return 1;if(lvl<=30)return 2;if(lvl<=40)return 3;if(lvl<=50)return 4;return 5; }
+function getLvl(tp) { for(let i=LEVELS.length-1;i>=0;i--){if(tp>=LEVELS[i].pts)return i;}return 0; }
+function currentTier() { return tierForLevel(getLvl(Math.max(0, state.totalPts))); }
+
+// ─── BUCKET DEFINITIONS ───
+const BUCKETS = [
+  {
+    id: 'anki', type: 'check', sectionLabel: null, tier: 0, isGate: true,
+    options: [{ id: 'anki', name: 'Anki flashcards', sub: 'Reviews + import new items to Renshuu', pts: 1, tier: 0 }]
+  },
+  {
+    id: 'textbook', type: 'multi', sectionLabel: 'Daily checklist', tier: 0,
+    tierCaps: { 0:8,1:8,2:8,3:8,4:8,5:8 },
+    options: [
+      { id: 'video', name: 'Video or challenge', pts: 4, tier: 0 },
+      { id: 'workbook', name: 'Genki workbook exercises', pts: 4, tier: 0 },
+      { id: 'kanji', name: 'Kanji reading video', pts: 4, tier: 0 },
+    ]
+  },
+  {
+    id: 'quizzes', type: 'multi', sectionLabel: null, tier: 0,
+    tierCaps: { 0:2,1:2,2:2,3:2,4:2,5:2 },
+    options: [
+      { id: 'renshuu', name: 'Renshuu', pts: 1, tier: 0 },
+      { id: 'teform', name: 'て-form quiz', pts: 1, tier: 0 },
+    ]
+  },
+  {
+    id: 'immersion', type: 'multi', sectionLabel: null, tier: 0,
+    tierCaps: { 0:3,1:5,2:11,3:21,4:21,5:21 },
+    options: [
+      { id: 'novels', name: 'Native novels (per chapter)', pts: 8, tier: 3 },
+      { id: 'jpjpmovie', name: 'JP/JP movie', pts: 8, tier: 3 },
+      { id: 'jpjpanime', name: 'JP/JP anime', pts: 6, tier: 2 },
+      { id: 'graded', name: 'Graded readers', pts: 2, tier: 0 },
+      { id: 'jpenmovie', name: 'JP/EN movie', pts: 2, tier: 1 },
+      { id: 'ensubanime', name: 'EN sub anime', pts: 1, tier: 0 },
+      { id: 'podcasts', name: 'Podcasts', pts: 1, tier: 0 },
+    ]
+  },
+  {
+    id: 'writing', type: 'multi', sectionLabel: null, tier: 1,
+    tierCaps: { 1:3,2:6,3:9,4:9,5:9 },
+    options: [
+      { id: 'freewrite', name: 'Free writing / journal', pts: 5, tier: 2 },
+      { id: 'guided', name: 'Guided writing practice', pts: 3, tier: 1 },
+    ]
+  },
+  {
+    id: 'teachback', type: 'multi', sectionLabel: null, tier: 2,
+    tierCaps: { 2:4,3:4,4:4,5:4 },
+    options: [
+      { id: 'teachback', name: 'Teach-back session', pts: 4, tier: 2 },
+    ]
+  },
+  {
+    id: 'weekly', type: 'weekly', sectionLabel: 'Weekly sessions', tier: 0,
+    options: [
+      { id: 'tutoring1', name: 'Live tutoring', pts: 8, tier: 0 },
+      { id: 'tutoring2', name: 'Live tutoring (2nd)', pts: 8, tier: 2 },
+      { id: 'crash1', name: '90-min crash session', pts: 6, tier: 0 },
+      { id: 'crash2', name: '90-min crash session (2nd)', pts: 6, tier: 2 },
+      { id: 'jlpt', name: 'JLPT practice section', pts: 5, tier: 1 },
+    ]
+  },
+];
+
+// ─── STATE ───
+function blank() {
+  return { checked:{}, entries:{}, dayPts:0, weekPts:0, totalPts:0, streak:0, lastDay:null, lastWeek:null, goal:50, history:{daily:{},weekly:{}} };
 }
-
-function showPlaceholder(imgWrap, title) {
-  imgWrap.innerHTML = '<div class="lvl-placeholder"><div class="lvl-placeholder-text">' + title + '</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';
-}
-
-window.openLvlOverlay = function(lvl, isLevelUp) {
-  const data = LEVELS[lvl];
-  const imgWrap = document.getElementById('lvl-img-wrap');
-  const img = new Image();
-  img.onload = function() { imgWrap.innerHTML = ''; imgWrap.appendChild(img); };
-  img.onerror = function() { showPlaceholder(imgWrap, data.title); };
-  img.alt = data.title;
-  img.src = levelImagePath(lvl);
-  // Show placeholder immediately while loading
-  showPlaceholder(imgWrap, data.title);
-  document.getElementById('lvl-badge').textContent = isLevelUp ? '🎉 Level Up!' : 'Level ' + lvl;
-  document.getElementById('lvl-badge').style.color = isLevelUp ? '#534AB7' : '#aaa';
-  document.getElementById('lvl-card-title').textContent = data.title;
-  document.getElementById('lvl-card-sub').textContent = data.sub;
-  document.getElementById('lvl-card-tier').textContent = TIER_NAMES[tierForLevel(lvl)];
-  document.getElementById('lvl-overlay').classList.add('open');
-};
-
-window.closeLvlOverlay = function() {
-  document.getElementById('lvl-overlay').classList.remove('open');
-};
-
+let state = blank();
+let saveTimer = null;
+let loaded = false;
+let chartMode = 'daily';
 let pendingLevelUp = null;
+let openPickers = {};
 
-function today(){
-  const d=new Date();
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-
-// ISO 8601 week number — weeks start on Monday
-function weekKey(d){
+// ─── HELPERS ───
+function today() { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function weekKey(d) {
   if(!d) d=new Date();
   const t=new Date(d.getFullYear(),d.getMonth(),d.getDate());
-  // Set to nearest Thursday (ISO: week with Thursday determines year)
   t.setDate(t.getDate()+3-((t.getDay()+6)%7));
   const jan4=new Date(t.getFullYear(),0,4);
   const wn=1+Math.round(((t-jan4)/86400000-(3-((jan4.getDay()+6)%7)))/7);
   return t.getFullYear()+'-W'+String(wn).padStart(2,'0');
 }
-
-function blank(){
-  return {checked:{},entries:{tokini:[],media:[]},dayPts:0,weekPts:0,totalPts:0,streak:0,lastDay:null,lastWeek:null,goal:50,history:{daily:{},weekly:{}}};
-}
-
-let state = blank();
-let saveTimer = null;
-let loaded = false;
-let chartMode = 'daily';
-
-function setSyncStatus(status, text) {
-  const dot = document.getElementById('sync-dot');
-  const label = document.getElementById('sync-text');
-  dot.className = 'sync-dot ' + status;
-  label.textContent = text;
-}
-
+function setSyncStatus(s,t) { document.getElementById('sync-dot').className='sync-dot '+s; document.getElementById('sync-text').textContent=t; }
 function scheduleSave() {
-  setSyncStatus('syncing', 'Saving...');
+  setSyncStatus('syncing','Saving...');
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    set(stateRef, state)
-      .then(() => setSyncStatus('synced', 'Saved'))
-      .catch(() => setSyncStatus('error', 'Save failed — check connection'));
-  }, 600);
+  saveTimer=setTimeout(()=>{
+    set(stateRef,state).then(()=>setSyncStatus('synced','Saved')).catch(()=>setSyncStatus('error','Save failed — check connection'));
+  },600);
 }
-
-function ensureHistory(s) {
-  if (!s.history) s.history = {daily:{},weekly:{}};
-  if (!s.history.daily) s.history.daily = {};
-  if (!s.history.weekly) s.history.weekly = {};
-}
-
-// Recalculate weekPts from daily history for the current ISO week
-function recalcWeekPts(s) {
-  ensureHistory(s);
-  const curWk = weekKey();
-  let total = 0;
-  for (const [dateStr, pts] of Object.entries(s.history.daily)) {
-    const d = new Date(dateStr + 'T12:00:00');
-    if (weekKey(d) === curWk) total += pts;
-  }
-  return total;
-}
-
-// Recalculate totalPts from all daily history
-function recalcTotalPts(s) {
-  ensureHistory(s);
-  let total = 0;
-  for (const pts of Object.values(s.history.daily)) {
-    total += (pts || 0);
-  }
-  return total;
-}
-
-function freshState(s) {
-  let changed = false;
-  ensureHistory(s);
-
-  // Archive the previous day before resetting
-  if (s.lastDay && s.lastDay !== today()) {
-    s.history.daily[s.lastDay] = s.dayPts || 0;
-    changed = true;
-  }
-
-  // Week rollover (Monday-based via ISO week)
-  if (s.lastWeek && s.lastWeek !== weekKey()) {
-    // Check if this is a genuine week change vs. a weekKey format migration.
-    const lastDayInCurrentWeek = s.lastDay && weekKey(new Date(s.lastDay + 'T12:00:00')) === weekKey();
-    if (!lastDayInCurrentWeek) {
-      // Genuine week rollover — snapshot completed week
-      recalcWeeklyFromDaily(s, s.lastWeek);
-    }
-    s.lastWeek = weekKey(); changed = true;
-  } else if (!s.lastWeek) {
-    s.lastWeek = weekKey(); changed = true;
-  }
-
-  // Day rollover
-  if (s.lastDay !== today()) {
-    s.checked = {}; s.entries = {tokini:[],media:[]}; s.dayPts = 0; s.lastDay = today(); changed = true;
-  }
-
-  if (!s.entries) s.entries = {tokini:[],media:[]};
-  if (!s.entries.tokini) s.entries.tokini = [];
-  if (!s.entries.media) s.entries.media = [];
-
-  // Always recalculate weekPts and totalPts from history (source of truth)
-  s.weekPts = recalcWeekPts(s);
-  s.totalPts = recalcTotalPts(s);
-  s.streak = calcStreak(s);
-
-  if (changed) set(stateRef, s).catch(() => {});
-  return s;
-}
-
-// Count consecutive days with pts > 0, going backwards from today
+function ensureHistory(s) { if(!s.history)s.history={daily:{},weekly:{}}; if(!s.history.daily)s.history.daily={}; if(!s.history.weekly)s.history.weekly={}; }
+function recalcWeekPts(s) { ensureHistory(s); const cw=weekKey(); let t=0; for(const[ds,p]of Object.entries(s.history.daily)){if(weekKey(new Date(ds+'T12:00:00'))===cw)t+=p;} return t; }
+function recalcTotalPts(s) { ensureHistory(s); let t=0; for(const p of Object.values(s.history.daily))t+=(p||0); return t; }
 function calcStreak(s) {
-  ensureHistory(s);
-  let streak = 0;
-  const d = new Date();
-  // If today has points, count it; otherwise start from yesterday
-  const todayPts = s.dayPts || 0;
-  if (todayPts > 0) {
-    streak = 1;
-    d.setDate(d.getDate() - 1);
-  } else {
-    d.setDate(d.getDate() - 1);
-  }
-  // Walk backwards through previous days
-  for (let i = 0; i < 365; i++) {
-    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-    const pts = s.history.daily[key];
-    if (pts !== undefined && pts > 0) {
-      streak++;
-      d.setDate(d.getDate() - 1);
-    } else {
-      break;
-    }
+  ensureHistory(s); let streak=0; const d=new Date();
+  if((s.dayPts||0)>0){streak=1;d.setDate(d.getDate()-1);} else{d.setDate(d.getDate()-1);}
+  for(let i=0;i<365;i++){
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(s.history.daily[k]>0){streak++;d.setDate(d.getDate()-1);}else break;
   }
   return streak;
 }
-
-// Sum all daily values that fall within a given ISO week
-function recalcWeeklyFromDaily(s, wk) {
-  ensureHistory(s);
-  let total = 0;
-  for (const [dateStr, pts] of Object.entries(s.history.daily)) {
-    const d = new Date(dateStr + 'T12:00:00');
-    if (weekKey(d) === wk) total += pts;
-  }
-  if (total > 0) s.history.weekly[wk] = total;
+function recalcWeeklyFromDaily(s,wk) { ensureHistory(s); let t=0; for(const[ds,p]of Object.entries(s.history.daily)){if(weekKey(new Date(ds+'T12:00:00'))===wk)t+=p;} if(t>0)s.history.weekly[wk]=t; }
+function entrySum(bid) { return(state.entries[bid]||[]).reduce((t,e)=>t+e.pts,0); }
+function bucketCap(bucket) {
+  if(!bucket.tierCaps)return 999;
+  const t=currentTier();
+  for(let i=t;i>=0;i--){if(bucket.tierCaps[i]!==undefined)return bucket.tierCaps[i];}
+  return 0;
 }
 
-onValue(stateRef, (snapshot) => {
-  const data = snapshot.val();
-  if (data) {
-    state = freshState({...blank(), ...data});
-  } else {
-    state = freshState(blank());
-  }
-  if (!loaded) {
-    loaded = true;
-    setSyncStatus('synced', 'Synced');
-  } else {
-    setSyncStatus('synced', 'Updated from another device');
-    setTimeout(() => setSyncStatus('synced', 'Synced'), 2000);
-  }
-  render();
-  renderChart();
-}, (error) => {
-  setSyncStatus('error', 'Connection failed');
-});
-
-function entrySum(key){return(state.entries[key]||[]).reduce((t,e)=>t+e.pts,0);}
-
-// Compute what dayPts should be given current checked/entries state.
-// Anki = 1 pt always (not gated).
-// All other activities only earn pts if Anki is checked.
+// ─── POINTS ───
 function computeDayPts(s) {
-  const ankiDone = !!s.checked.anki;
-  let pts = ankiDone ? BASE.anki : 0;
-  if (ankiDone) {
-    ['renshuu','grammar','crash','preply'].forEach(k => {
-      if (s.checked[k]) pts += BASE[k];
-    });
-    ['tokini','media'].forEach(key => {
-      pts += (s.entries[key] || []).reduce((t,e) => t+e.pts, 0);
-    });
+  const ankiDone=!!s.checked.anki;
+  let pts=ankiDone?1:0;
+  if(!ankiDone)return pts;
+  for(const bucket of BUCKETS){
+    if(bucket.id==='anki')continue;
+    if(bucket.type==='multi') pts+=(s.entries[bucket.id]||[]).reduce((t,e)=>t+e.pts,0);
+    if(bucket.type==='weekly') for(const opt of bucket.options){if(s.checked[opt.id])pts+=opt.pts;}
   }
   return pts;
 }
-
 function syncTodayHistory() {
   ensureHistory(state);
-  const prevLevel = getLvl(Math.max(0, state.totalPts));
-  state.dayPts = computeDayPts(state);
-  state.history.daily[today()] = Math.max(0, state.dayPts);
-  state.weekPts = recalcWeekPts(state);
-  state.totalPts = recalcTotalPts(state);
-  state.streak = calcStreak(state);
-  const newLevel = getLvl(state.totalPts);
-  if (newLevel > prevLevel) pendingLevelUp = newLevel;
+  const prev=getLvl(Math.max(0,state.totalPts));
+  state.dayPts=computeDayPts(state);
+  state.history.daily[today()]=Math.max(0,state.dayPts);
+  state.weekPts=recalcWeekPts(state);
+  state.totalPts=recalcTotalPts(state);
+  state.streak=calcStreak(state);
+  const nw=getLvl(state.totalPts);
+  if(nw>prev)pendingLevelUp=nw;
 }
 
-// Retroactively adjust points for a past day (up to 2 days back)
-window.adjustDay = function(dateStr, newPts) {
-  const val = parseInt(newPts);
-  if (isNaN(val) || val < 0) return;
-  ensureHistory(state);
-
-  if (dateStr === today()) {
-    // For today, recompute from actual state rather than overriding
-    syncTodayHistory();
-  } else {
-    state.history.daily[dateStr] = val;
-    // Recalculate everything from history
-    state.weekPts = recalcWeekPts(state);
-    state.totalPts = recalcTotalPts(state);
-    state.streak = calcStreak(state);
-    // Rebuild weekly history for any affected week
-    const affectedWk = weekKey(new Date(dateStr + 'T12:00:00'));
-    recalcWeeklyFromDaily(state, affectedWk);
-  }
-
-  scheduleSave(); render(); renderChart();
-};
-
-window.startEditBar = function(dateKey, svgX, svgY, currentVal) {
-  const container = document.getElementById('chart-container');
-  const svgEl = container.querySelector('svg');
-  if (!svgEl) return;
-  const existing = container.querySelector('.chart-edit-input');
-  if (existing) existing.remove();
-
-  const rect = svgEl.getBoundingClientRect();
-  const viewBox = svgEl.viewBox.baseVal;
-  const scaleX = rect.width / viewBox.width;
-  const scaleY = rect.height / viewBox.height;
-
-  const input = document.createElement('input');
-  input.type = 'number';
-  input.className = 'chart-edit-input';
-  input.min = '0';
-  input.max = '50';
-  input.value = currentVal;
-  input.style.position = 'absolute';
-  input.style.left = (svgX * scaleX - 18) + 'px';
-  input.style.top = (svgY * scaleY) + 'px';
-  container.appendChild(input);
-  input.focus();
-  input.select();
-
-  function commit() {
-    const v = parseInt(input.value);
-    if (!isNaN(v) && v >= 0) adjustDay(dateKey, v);
-    if (input.parentNode) input.remove();
-  }
-  input.addEventListener('blur', commit);
-  input.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
-    if (e.key === 'Escape') { if (input.parentNode) input.remove(); }
-  });
-};
-
-window.toggleSimple = function(key) {
-  state.checked[key] = !state.checked[key];
-  syncTodayHistory();
-  scheduleSave();render();renderChart();
-};
-
-window.togglePicker = function(key) {
-  const el=document.getElementById('picker-'+key);
-  const isOpen=el.style.display!=='none';
-  document.getElementById('picker-tokini').style.display='none';
-  document.getElementById('picker-media').style.display='none';
-  if(!isOpen)el.style.display='block';
-};
-
-window.addEntry = function(key,type,basePts,label) {
-  const remaining=CAPS[key]-entrySum(key);
-  if(remaining<=0)return;
-  const actual=Math.min(basePts,remaining);
-  state.entries[key].push({type,label,pts:actual});
-  syncTodayHistory();
-  document.getElementById('picker-'+key).style.display='none';
-  scheduleSave();render();renderChart();
-};
-
-window.removeEntry = function(key,idx) {
-  state.entries[key].splice(idx,1);
-  syncTodayHistory();
-  scheduleSave();render();renderChart();
-};
-
-window.updateGoal = function() {
-  const v=parseInt(document.getElementById('goal-input').value);
-  if(!isNaN(v)&&v>=10){state.goal=v;scheduleSave();render();renderChart();}
-};
-
-window.resetDay = function() {
-  state.checked={};state.entries={tokini:[],media:[]};state.dayPts=0;
-  syncTodayHistory();
-  scheduleSave();render();renderChart();
-};
-
-// Drawer
-function sizeChart() {
-  requestAnimationFrame(() => {
-    const panel = document.getElementById('drawer-panel');
-    const container = document.getElementById('chart-container');
-    const svg = container.querySelector('svg');
-    if (!panel || !svg) return;
-    const panelH = Math.min(window.innerHeight * 0.85, window.innerHeight);
-    const handleH = panel.querySelector('.drawer-handle').offsetHeight;
-    const titleH = panel.querySelector('.drawer-title').offsetHeight;
-    const toggleH = panel.querySelector('.toggle-group').offsetHeight;
-    const pad = 48;
-    const available = panelH - handleH - titleH - toggleH - pad;
-    svg.style.maxHeight = Math.max(100, available) + 'px';
-  });
+// ─── STATE MGMT ───
+function freshState(s) {
+  let changed=false; ensureHistory(s);
+  if(s.lastDay&&s.lastDay!==today()){s.history.daily[s.lastDay]=s.dayPts||0;changed=true;}
+  if(s.lastWeek&&s.lastWeek!==weekKey()){
+    const liw=s.lastDay&&weekKey(new Date(s.lastDay+'T12:00:00'))===weekKey();
+    if(!liw)recalcWeeklyFromDaily(s,s.lastWeek);
+    s.lastWeek=weekKey();changed=true;
+  }else if(!s.lastWeek){s.lastWeek=weekKey();changed=true;}
+  if(s.lastDay!==today()){s.checked={};s.entries={};s.dayPts=0;s.lastDay=today();changed=true;}
+  if(!s.entries)s.entries={};
+  s.weekPts=recalcWeekPts(s);s.totalPts=recalcTotalPts(s);s.streak=calcStreak(s);
+  if(changed)set(stateRef,s).catch(()=>{});
+  return s;
 }
 
-window.openDrawer = function() {
-  document.getElementById('drawer-overlay').classList.add('open');
-  document.getElementById('drawer-panel').classList.add('open');
-  renderChart();
-  sizeChart();
+// ─── FIREBASE ───
+onValue(stateRef,(snapshot)=>{
+  const data=snapshot.val();
+  state=data?freshState({...blank(),...data}):freshState(blank());
+  if(!loaded){loaded=true;setSyncStatus('synced','Synced');}
+  else{setSyncStatus('synced','Updated from another device');setTimeout(()=>setSyncStatus('synced','Synced'),2000);}
+  render();renderChart();
+},(error)=>{setSyncStatus('error','Connection failed');});
+
+// ─── ACTIONS ───
+window.toggleCheck=function(optId){state.checked[optId]=!state.checked[optId];syncTodayHistory();scheduleSave();render();renderChart();};
+window.togglePicker=function(bid){for(const k of Object.keys(openPickers)){if(k!==bid)openPickers[k]=false;}openPickers[bid]=!openPickers[bid];render();};
+window.addEntry=function(bid,optId,basePts,label){
+  const bucket=BUCKETS.find(b=>b.id===bid);if(!bucket)return;
+  const cap=bucketCap(bucket),spent=entrySum(bid),rem=cap-spent;if(rem<=0)return;
+  const actual=Math.min(basePts,rem);
+  if(!state.entries[bid])state.entries[bid]=[];
+  state.entries[bid].push({id:optId,name:label,pts:actual});
+  openPickers[bid]=false;syncTodayHistory();scheduleSave();render();renderChart();
+};
+window.removeEntry=function(bid,idx){if(!state.entries[bid])return;state.entries[bid].splice(idx,1);syncTodayHistory();scheduleSave();render();renderChart();};
+window.updateGoal=function(){const v=parseInt(document.getElementById('goal-input').value);if(!isNaN(v)&&v>=10){state.goal=v;scheduleSave();render();renderChart();}};
+window.resetDay=function(){state.checked={};state.entries={};state.dayPts=0;syncTodayHistory();scheduleSave();render();renderChart();};
+
+// ─── CHART EDITING ───
+window.adjustDay=function(ds,np){const v=parseInt(np);if(isNaN(v)||v<0)return;ensureHistory(state);if(ds===today()){syncTodayHistory();}else{state.history.daily[ds]=v;state.weekPts=recalcWeekPts(state);state.totalPts=recalcTotalPts(state);state.streak=calcStreak(state);recalcWeeklyFromDaily(state,weekKey(new Date(ds+'T12:00:00')));}scheduleSave();render();renderChart();};
+window.startEditBar=function(dk,sx,sy,cv){
+  const c=document.getElementById('chart-container'),svg=c.querySelector('svg');if(!svg)return;
+  const ex=c.querySelector('.chart-edit-input');if(ex)ex.remove();
+  const r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,scX=r.width/vb.width,scY=r.height/vb.height;
+  const inp=document.createElement('input');inp.type='number';inp.className='chart-edit-input';inp.min='0';inp.max='100';inp.value=cv;
+  inp.style.position='absolute';inp.style.left=(sx*scX-18)+'px';inp.style.top=(sy*scY)+'px';
+  c.appendChild(inp);inp.focus();inp.select();
+  function commit(){const v=parseInt(inp.value);if(!isNaN(v)&&v>=0)adjustDay(dk,v);if(inp.parentNode)inp.remove();}
+  inp.addEventListener('blur',commit);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();inp.blur();}if(e.key==='Escape'){if(inp.parentNode)inp.remove();}});
 };
 
-window.closeDrawer = function() {
-  document.getElementById('drawer-overlay').classList.remove('open');
-  document.getElementById('drawer-panel').classList.remove('open');
+// ─── LEVEL ART ───
+function levelImagePath(l){return'images/lvl-'+String(l).padStart(2,'0')+'.png';}
+function showPlaceholder(w,t){w.innerHTML='<div class="lvl-placeholder"><div class="lvl-placeholder-text">'+t+'</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';}
+window.openLvlOverlay=function(l,up){
+  const d=LEVELS[l],w=document.getElementById('lvl-img-wrap'),img=new Image();
+  img.onload=function(){w.innerHTML='';w.appendChild(img);};img.onerror=function(){showPlaceholder(w,d.title);};
+  img.alt=d.title;img.src=levelImagePath(l);showPlaceholder(w,d.title);
+  document.getElementById('lvl-badge').textContent=up?'🎉 Level Up!':'Level '+l;
+  document.getElementById('lvl-badge').style.color=up?'#534AB7':'#aaa';
+  document.getElementById('lvl-card-title').textContent=d.title;
+  document.getElementById('lvl-card-sub').textContent=d.sub;
+  document.getElementById('lvl-card-tier').textContent=TIER_NAMES[tierForLevel(l)];
+  document.getElementById('lvl-overlay').classList.add('open');
 };
+window.closeLvlOverlay=function(){document.getElementById('lvl-overlay').classList.remove('open');};
+
+// ─── DRAWERS ───
+function sizeChart(){requestAnimationFrame(()=>{const p=document.getElementById('drawer-panel'),c=document.getElementById('chart-container'),s=c.querySelector('svg');if(!p||!s)return;const pH=Math.min(window.innerHeight*0.85,window.innerHeight),hH=p.querySelector('.drawer-handle').offsetHeight,tH=p.querySelector('.drawer-title').offsetHeight,gH=p.querySelector('.toggle-group').offsetHeight;s.style.maxHeight=Math.max(100,pH-hH-tH-gH-48)+'px';});}
+window.openDrawer=function(){document.getElementById('drawer-overlay').classList.add('open');document.getElementById('drawer-panel').classList.add('open');renderChart();sizeChart();};
+window.closeDrawer=function(){document.getElementById('drawer-overlay').classList.remove('open');document.getElementById('drawer-panel').classList.remove('open');};
+window.addEventListener('resize',()=>{if(document.getElementById('drawer-panel').classList.contains('open'))sizeChart();});
+window.setChartMode=function(m){chartMode=m;document.getElementById('toggle-daily').className='toggle-opt'+(m==='daily'?' active':'');document.getElementById('toggle-weekly').className='toggle-opt'+(m==='weekly'?' active':'');renderChart();sizeChart();};
 
 // Gallery
-window.openGallery = function() {
-  renderGallery();
-  document.getElementById('gallery-overlay').classList.add('open');
-  document.getElementById('gallery-panel').classList.add('open');
-};
-
-window.closeGallery = function() {
-  document.getElementById('gallery-overlay').classList.remove('open');
-  document.getElementById('gallery-panel').classList.remove('open');
-};
-
-function renderGallery() {
-  const tp = Math.max(0, state.totalPts);
-  const currentLvl = getLvl(tp);
-  const grid = document.getElementById('gallery-grid');
-  const counter = document.getElementById('gallery-counter');
-  counter.innerHTML = '<strong>' + (currentLvl + 1) + '</strong> / ' + LEVELS.length + ' unlocked';
-
-  let html = '';
-  let lastTier = -1;
-
-  LEVELS.forEach((lvl, i) => {
-    const tier = tierForLevel(i);
-    if (tier !== lastTier) {
-      lastTier = tier;
-      html += '<div class="gallery-tier-label">' + TIER_NAMES[tier] + ' — Lvl ' + (tier === 0 ? '0' : (tier * 10 + 1)) + '–' + Math.min((tier + 1) * 10, 57) + '</div>';
-    }
-
-    const unlocked = i <= currentLvl;
-    const cls = 'gallery-cell' + (unlocked ? '' : ' locked');
-
-    html += '<div class="' + cls + '"' + (unlocked ? ' onclick="closeGallery();setTimeout(function(){openLvlOverlay(' + i + ',false)},350)"' : '') + '>';
-
-    // Image or placeholder
-    if (unlocked) {
-      html += '<div class="gallery-cell-placeholder" id="gal-ph-' + i + '">' + lvl.title + '</div>';
-    } else {
-      html += '<div class="gallery-cell-placeholder">?</div>';
-      html += '<div class="gallery-lock-icon">🔒</div>';
-    }
-
-    html += '<div class="gallery-cell-footer">';
-    html += '<div class="gallery-cell-name">' + lvl.title + '</div>';
-    html += '<div class="gallery-cell-lvl">Lv. ' + i + (unlocked ? '' : ' · ' + lvl.pts + ' pts') + '</div>';
-    html += '</div></div>';
+window.openGallery=function(){renderGallery();document.getElementById('gallery-overlay').classList.add('open');document.getElementById('gallery-panel').classList.add('open');};
+window.closeGallery=function(){document.getElementById('gallery-overlay').classList.remove('open');document.getElementById('gallery-panel').classList.remove('open');};
+function renderGallery(){
+  const tp=Math.max(0,state.totalPts),cl=getLvl(tp),grid=document.getElementById('gallery-grid'),counter=document.getElementById('gallery-counter');
+  counter.innerHTML='<strong>'+(cl+1)+'</strong> / '+LEVELS.length+' unlocked';
+  let html='',lt=-1;
+  LEVELS.forEach((lv,i)=>{
+    const tier=tierForLevel(i);
+    if(tier!==lt){lt=tier;const ts=tier===0?0:tier*10+1;html+='<div class="gallery-tier-label">'+TIER_NAMES[tier]+' — Lvl '+ts+'–'+Math.min((tier+1)*10,57)+'</div>';}
+    const u=i<=cl;html+='<div class="gallery-cell'+(u?'':' locked')+'"'+(u?' onclick="closeGallery();setTimeout(function(){openLvlOverlay('+i+',false)},350)"':'')+'>';
+    if(u)html+='<div class="gallery-cell-placeholder" id="gal-ph-'+i+'">'+lv.title+'</div>';
+    else html+='<div class="gallery-cell-placeholder">?</div><div class="gallery-lock-icon">🔒</div>';
+    html+='<div class="gallery-cell-footer"><div class="gallery-cell-name">'+lv.title+'</div><div class="gallery-cell-lvl">Lv. '+i+(u?'':' · '+lv.pts+' pts')+'</div></div></div>';
   });
-
-  grid.innerHTML = html;
-
-  // Try loading images for unlocked levels
-  for (let i = 0; i <= currentLvl && i < LEVELS.length; i++) {
-    (function(idx) {
-      const img = new Image();
-      img.onload = function() {
-        const ph = document.getElementById('gal-ph-' + idx);
-        if (ph) {
-          img.className = 'gallery-cell-img';
-          img.alt = LEVELS[idx].title;
-          ph.replaceWith(img);
-        }
-      };
-      img.src = levelImagePath(idx);
-    })(i);
-  }
+  grid.innerHTML=html;
+  for(let i=0;i<=cl&&i<LEVELS.length;i++){(function(idx){const img=new Image();img.onload=function(){const ph=document.getElementById('gal-ph-'+idx);if(ph){img.className='gallery-cell-img';img.alt=LEVELS[idx].title;ph.replaceWith(img);}};img.src=levelImagePath(idx);})(i);}
 }
 
-window.addEventListener('resize', () => {
-  if (document.getElementById('drawer-panel').classList.contains('open')) sizeChart();
-});
-
-window.setChartMode = function(mode) {
-  chartMode = mode;
-  document.getElementById('toggle-daily').className = 'toggle-opt' + (mode==='daily'?' active':'');
-  document.getElementById('toggle-weekly').className = 'toggle-opt' + (mode==='weekly'?' active':'');
-  renderChart();
-  sizeChart();
-};
-
-// Get the Monday of an ISO week string like "2026-W12"
-function mondayOfWeek(wkStr) {
-  const m = wkStr.match(/(\d{4})-W(\d{2})/);
-  if (!m) return null;
-  const year = parseInt(m[1]), week = parseInt(m[2]);
-  const jan4 = new Date(year, 0, 4);
-  const dow = (jan4.getDay() + 6) % 7; // 0=Mon
-  const mon = new Date(jan4);
-  mon.setDate(jan4.getDate() - dow + (week - 1) * 7);
-  return mon;
-}
-
-function renderChart() {
-  const container = document.getElementById('chart-container');
-  if (!container) return;
-
-  ensureHistory(state);
-  const history = state.history;
-  let data = [];
-  let goalLine = null;
-  const DAYABBR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-  if (chartMode === 'daily') {
-    for (let i = 9; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-      const label = DAYABBR[d.getDay()];
-      const sublabel = String(d.getMonth()+1)+'/'+d.getDate();
-      let pts = history.daily[key];
-      const isToday = key === today();
-      if (isToday) pts = Math.max(0, state.dayPts);
-      data.push({ key, label, sublabel, pts: pts !== undefined ? pts : null, isToday, daysAgo: i });
-    }
-    goalLine = Math.round(state.goal / 7);
-  } else {
-    // Build unique last 10 weeks
-    const seen = new Set();
-    for (let i = 69; i >= 0; i--) { // scan back ~10 weeks of days
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const wk = weekKey(d);
-      if (seen.has(wk)) continue;
-      seen.add(wk);
-      const isCurrent = wk === weekKey();
-      let pts = history.weekly[wk];
-      if (isCurrent) pts = Math.max(0, state.weekPts);
-      const label = wk.split('-')[1]; // "W12"
-      const mon = mondayOfWeek(wk);
-      const sublabel = mon ? (String(mon.getMonth()+1)+'/'+mon.getDate()) : '';
-      data.push({ key: wk, label, sublabel, pts: pts !== undefined ? pts : null, isToday: isCurrent });
-    }
-    // Keep last 10
-    data = data.slice(-10);
-    goalLine = state.goal;
-  }
-
-  // SVG dimensions
-  const W = 440, H = 200;
-  const PAD = { top: 22, right: 72, bottom: 38, left: 6 };
-  const chartW = W - PAD.left - PAD.right;
-  const chartH = H - PAD.top - PAD.bottom;
-  const n = data.length;
-
-  if (n === 0) {
-    container.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'"><text x="'+(W/2)+'" y="'+(H/2)+'" text-anchor="middle" class="chart-empty">No data yet</text></svg>';
-    return;
-  }
-
-  // Compute average (exclude today/current and null entries)
-  const past = data.filter(d => d.pts !== null && d.pts > 0 && !d.isToday);
-  const avg = past.length > 0 ? Math.round(past.reduce((a,b)=>a+b.pts,0) / past.length * 10) / 10 : null;
-
-  const vals = data.map(d => d.pts || 0);
-  const maxVal = Math.max(...vals, goalLine || 0, avg || 0, 1);
-  const ceil = maxVal * 1.2;
-  const yScale = chartH / ceil;
-  const barW = Math.min(30, (chartW / n) * 0.55);
-  const gap = chartW / n;
-  const labelX = W - PAD.right + 8;
-
-  let svg = '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
-
-  // Horizontal grid lines
-  const gridCount = 3;
-  for (let i = 1; i <= gridCount; i++) {
-    const yy = PAD.top + chartH - (chartH / gridCount * i);
-    svg += '<line x1="'+PAD.left+'" y1="'+yy+'" x2="'+(PAD.left+chartW)+'" y2="'+yy+'" class="chart-grid"/>';
-  }
-
-  // Goal reference line
-  let goalLabelY = null;
-  if (goalLine && goalLine > 0 && goalLine * yScale <= chartH) {
-    const gy = PAD.top + chartH - goalLine * yScale;
-    svg += '<line x1="'+PAD.left+'" y1="'+gy+'" x2="'+(PAD.left+chartW)+'" y2="'+gy+'" class="chart-goal-line"/>';
-    const goalText = chartMode==='daily' ? '~'+goalLine+'/day' : 'goal: '+goalLine;
-    goalLabelY = gy + 3;
-    svg += '<text x="'+labelX+'" y="'+goalLabelY+'" text-anchor="start" class="chart-goal-label">'+goalText+'</text>';
-  }
-
-  // Average reference line
-  if (avg !== null && avg > 0 && avg * yScale <= chartH) {
-    const ay = PAD.top + chartH - avg * yScale;
-    svg += '<line x1="'+PAD.left+'" y1="'+ay+'" x2="'+(PAD.left+chartW)+'" y2="'+ay+'" class="chart-avg-line"/>';
-    const avgRounded = Math.round(avg * 10) / 10;
-    let avgLabelY = ay + 3;
-    if (goalLabelY !== null && Math.abs(avgLabelY - goalLabelY) < 12) {
-      avgLabelY = goalLabelY > avgLabelY ? goalLabelY - 12 : goalLabelY + 12;
-    }
-    svg += '<text x="'+labelX+'" y="'+avgLabelY+'" text-anchor="start" class="chart-avg-label">avg: '+avgRounded+'</text>';
-  }
-
-  // Bars
-  data.forEach((d, i) => {
-    const cx = PAD.left + gap * i + gap / 2;
-    const x = cx - barW / 2;
-    const val = d.pts || 0;
-    const editable = chartMode === 'daily' && (d.daysAgo === 1 || d.daysAgo === 2);
-
-    if (d.pts !== null && val > 0) {
-      const barH = Math.max(2, val * yScale);
-      const y = PAD.top + chartH - barH;
-      let cls = 'chart-bar';
-      if (d.isToday) cls = 'chart-bar-today';
-      else if (goalLine && val >= goalLine) cls = 'chart-bar-goal';
-      svg += '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+barH+'" class="'+cls+'" rx="3" ry="3"/>';
-      if (editable) {
-        svg += '<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;font-weight:600" onclick="startEditBar(\''+d.key+'\','+cx+','+(y-16)+','+val+')">'+val+'</text>';
-      } else {
-        svg += '<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label" style="font-size:10px;font-weight:600">'+val+'</text>';
-      }
-    } else if (d.pts !== null) {
-      svg += '<circle cx="'+cx+'" cy="'+(PAD.top+chartH-1)+'" r="2" class="chart-zero"/>';
-      if (editable) {
-        svg += '<text x="'+cx+'" y="'+(PAD.top+chartH-10)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;font-weight:600;cursor:pointer" onclick="startEditBar(\''+d.key+'\','+cx+','+(PAD.top+chartH-22)+','+val+')">'+val+'</text>';
-      }
-    } else if (editable) {
-      svg += '<text x="'+cx+'" y="'+(PAD.top+chartH-10)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;cursor:pointer" onclick="startEditBar(\''+d.key+'\','+cx+','+(PAD.top+chartH-22)+',0)">—</text>';
-    }
-
-    // X labels
-    const bold = d.isToday ? ' style="font-weight:600"' : '';
-    svg += '<text x="'+cx+'" y="'+(PAD.top+chartH+14)+'" text-anchor="middle" class="chart-label"'+bold+'>'+d.label+'</text>';
-    svg += '<text x="'+cx+'" y="'+(PAD.top+chartH+25)+'" text-anchor="middle" class="chart-sublabel">'+d.sublabel+'</text>';
+// ─── CHART ───
+function mondayOfWeek(w){const m=w.match(/(\d{4})-W(\d{2})/);if(!m)return null;const y=parseInt(m[1]),wk=parseInt(m[2]),j=new Date(y,0,4),dw=(j.getDay()+6)%7,mn=new Date(j);mn.setDate(j.getDate()-dw+(wk-1)*7);return mn;}
+function renderChart(){
+  const c=document.getElementById('chart-container');if(!c)return;ensureHistory(state);const h=state.history;let data=[];let goalLine=null;const DA=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if(chartMode==='daily'){for(let i=9;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),l=DA[d.getDay()],sl=String(d.getMonth()+1)+'/'+d.getDate();let p=h.daily[k];const it=k===today();if(it)p=Math.max(0,state.dayPts);data.push({key:k,label:l,sublabel:sl,pts:p!==undefined?p:null,isToday:it,daysAgo:i});}goalLine=Math.round(state.goal/7);}
+  else{const seen=new Set();for(let i=69;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const wk=weekKey(d);if(seen.has(wk))continue;seen.add(wk);const ic=wk===weekKey();let p=h.weekly[wk];if(ic)p=Math.max(0,state.weekPts);const l=wk.split('-')[1],mn=mondayOfWeek(wk),sl=mn?(String(mn.getMonth()+1)+'/'+mn.getDate()):'';data.push({key:wk,label:l,sublabel:sl,pts:p!==undefined?p:null,isToday:ic});}data=data.slice(-10);goalLine=state.goal;}
+  const W=440,H=200,PAD={top:22,right:72,bottom:38,left:6},cW=W-PAD.left-PAD.right,cH=H-PAD.top-PAD.bottom,n=data.length;
+  if(n===0){c.innerHTML='<svg viewBox="0 0 '+W+' '+H+'"><text x="'+(W/2)+'" y="'+(H/2)+'" text-anchor="middle" class="chart-empty">No data yet</text></svg>';return;}
+  const past=data.filter(d=>d.pts!==null&&d.pts>0&&!d.isToday),avg=past.length>0?Math.round(past.reduce((a,b)=>a+b.pts,0)/past.length*10)/10:null;
+  const vals=data.map(d=>d.pts||0),maxVal=Math.max(...vals,goalLine||0,avg||0,1),ceil=maxVal*1.2,yS=cH/ceil,bW=Math.min(30,(cW/n)*0.55),gap=cW/n,lX=W-PAD.right+8;
+  let svg='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
+  for(let i=1;i<=3;i++){const yy=PAD.top+cH-(cH/3*i);svg+='<line x1="'+PAD.left+'" y1="'+yy+'" x2="'+(PAD.left+cW)+'" y2="'+yy+'" class="chart-grid"/>';}
+  let gLY=null;
+  if(goalLine&&goalLine>0&&goalLine*yS<=cH){const gy=PAD.top+cH-goalLine*yS;svg+='<line x1="'+PAD.left+'" y1="'+gy+'" x2="'+(PAD.left+cW)+'" y2="'+gy+'" class="chart-goal-line"/>';gLY=gy+3;svg+='<text x="'+lX+'" y="'+gLY+'" text-anchor="start" class="chart-goal-label">'+(chartMode==='daily'?'~'+goalLine+'/day':'goal: '+goalLine)+'</text>';}
+  if(avg!==null&&avg>0&&avg*yS<=cH){const ay=PAD.top+cH-avg*yS;svg+='<line x1="'+PAD.left+'" y1="'+ay+'" x2="'+(PAD.left+cW)+'" y2="'+ay+'" class="chart-avg-line"/>';let aLY=ay+3;if(gLY!==null&&Math.abs(aLY-gLY)<12)aLY=gLY>aLY?gLY-12:gLY+12;svg+='<text x="'+lX+'" y="'+aLY+'" text-anchor="start" class="chart-avg-label">avg: '+(Math.round(avg*10)/10)+'</text>';}
+  data.forEach((d,i)=>{
+    const cx=PAD.left+gap*i+gap/2,x=cx-bW/2,val=d.pts||0,ed=chartMode==='daily'&&(d.daysAgo===1||d.daysAgo===2);
+    if(d.pts!==null&&val>0){const bH=Math.max(2,val*yS),y=PAD.top+cH-bH;let cls='chart-bar';if(d.isToday)cls='chart-bar-today';else if(goalLine&&val>=goalLine)cls='chart-bar-goal';svg+='<rect x="'+x+'" y="'+y+'" width="'+bW+'" height="'+bH+'" class="'+cls+'" rx="3" ry="3"/>';if(ed)svg+='<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;font-weight:600" onclick="startEditBar(\''+d.key+'\','+cx+','+(y-16)+','+val+')">'+val+'</text>';else svg+='<text x="'+cx+'" y="'+(y-5)+'" text-anchor="middle" class="chart-label" style="font-size:10px;font-weight:600">'+val+'</text>';}
+    else if(d.pts!==null){svg+='<circle cx="'+cx+'" cy="'+(PAD.top+cH-1)+'" r="2" class="chart-zero"/>';if(ed)svg+='<text x="'+cx+'" y="'+(PAD.top+cH-10)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;font-weight:600;cursor:pointer" onclick="startEditBar(\''+d.key+'\','+cx+','+(PAD.top+cH-22)+','+val+')">'+val+'</text>';}
+    else if(ed){svg+='<text x="'+cx+'" y="'+(PAD.top+cH-10)+'" text-anchor="middle" class="chart-label chart-editable" style="font-size:10px;cursor:pointer" onclick="startEditBar(\''+d.key+'\','+cx+','+(PAD.top+cH-22)+',0)">—</text>';}
+    svg+='<text x="'+cx+'" y="'+(PAD.top+cH+14)+'" text-anchor="middle" class="chart-label"'+(d.isToday?' style="font-weight:600"':'')+'>'+d.label+'</text>';
+    svg+='<text x="'+cx+'" y="'+(PAD.top+cH+25)+'" text-anchor="middle" class="chart-sublabel">'+d.sublabel+'</text>';
   });
-
-  svg += '</svg>';
-  container.innerHTML = svg;
+  svg+='</svg>';c.innerHTML=svg;
 }
 
-function getLvl(tp){for(let i=LEVELS.length-1;i>=0;i--){if(tp>=LEVELS[i].pts)return i;}return 0;}
-
-function render(){
+// ─── RENDER ───
+function render() {
   const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const d=new Date();
@@ -1169,7 +637,7 @@ function render(){
   const titleEl=document.getElementById('level-title');
   titleEl.textContent=LEVELS[lvl].title;
   titleEl.style.cursor='pointer';
-  titleEl.onclick=()=>window.openLvlOverlay(lvl, false);
+  titleEl.onclick=()=>window.openLvlOverlay(lvl,false);
   const tlen=LEVELS[lvl].title.length;
   titleEl.style.fontSize=tlen>8?'13px':tlen>6?'15px':'16px';
   document.getElementById('level-sub').textContent=LEVELS[lvl].sub;
@@ -1178,78 +646,83 @@ function render(){
   document.getElementById('level-next').textContent=isMax?'':('next: '+nxt+' pts');
   document.getElementById('level-remaining').textContent=isMax?'max level':((nxt-tp)+' pts to next level');
 
-  const ankiDone = !!state.checked.anki;
-  const LOCK = ' 🔒';
+  // ─── CHECKLIST ───
+  const container=document.getElementById('checklist-container');
+  const ankiDone=!!state.checked.anki;
+  const LOCK=' 🔒';
+  const tier=currentTier();
+  let html='';
 
-  ['anki','renshuu','grammar','crash','preply'].forEach(k=>{
-    const done=state.checked[k];
-    const gated = k !== 'anki';
-    const locked = gated && !ankiDone;
-    document.getElementById('check-'+k).className='check'+(done?' done':'');
-    const badge = document.getElementById('badge-'+k);
-    const basePts = '+'+BASE[k]+' pt'+(BASE[k]===1?'':'s');
-    if (done && !locked) {
-      badge.className = 'pts-badge earned';
-      badge.textContent = basePts;
-    } else if (locked) {
-      badge.className = 'pts-badge locked';
-      badge.textContent = basePts + LOCK;
-    } else {
-      badge.className = 'pts-badge';
-      badge.textContent = basePts;
+  for(const bucket of BUCKETS){
+    if(bucket.tier>tier)continue;
+    const visibleOpts=bucket.options.filter(o=>o.tier<=tier).sort((a,b)=>b.pts-a.pts);
+    if(visibleOpts.length===0)continue;
+
+    // Section label
+    if(bucket.sectionLabel) html+='<div class="section-label">'+bucket.sectionLabel+'</div>';
+
+    if(bucket.isGate){
+      const opt=visibleOpts[0],done=!!state.checked[opt.id];
+      html+='<div class="card"><div class="activity-row" onclick="toggleCheck(\''+opt.id+'\')">';
+      html+='<div class="check'+(done?' done':'')+'"></div>';
+      html+='<div class="activity-info"><div class="activity-name">'+opt.name+'</div><div class="activity-sub">'+opt.sub+'</div></div>';
+      html+='<div class="pts-badge'+(done?' earned':'')+'">+'+opt.pts+' pt</div>';
+      html+='</div><div class="habit-row"><div class="habit-dot'+(done?' active':'')+'"></div>';
+      html+='<div class="habit-text">'+(done?'Minimum daily goal reached — other points now unlocked':'Complete Anki to unlock points for all other activities')+'</div></div></div>';
     }
-  });
-
-  document.getElementById('habit-dot').className='habit-dot'+(state.checked.anki?' active':'');
-  document.getElementById('habit-text').textContent=state.checked.anki?'Minimum daily goal reached — other points now unlocked':'Complete Anki to unlock points for all other activities';
-
-  ['tokini','media'].forEach(key=>{
-    const cap=CAPS[key],entries=state.entries[key]||[],spent=entrySum(key),remaining=cap-spent;
-    const opts=OPT_PTS[key];
-    const container=document.getElementById(key+'-entries');
-    container.innerHTML='';
-    entries.forEach((e,i)=>{
-      const row=document.createElement('div');
-      row.className='entry-row';
-      const ptsClass = ankiDone ? 'entry-pts' : 'entry-pts locked';
-      const ptsText = ankiDone ? '+'+e.pts+' pts' : '+'+e.pts+' pts' + LOCK;
-      row.innerHTML='<div class="entry-dot"></div><span class="entry-name">'+e.label+'</span><span class="'+ptsClass+'">'+ptsText+'</span><span class="entry-remove" onclick="removeEntry(\''+key+'\','+i+')">×</span>';
-      container.appendChild(row);
-    });
-    const tb=document.getElementById(key+'-total-badge');
-    tb.style.visibility=spent>0?'visible':'hidden';
-    tb.textContent = spent + ' pts' + (!ankiDone && spent > 0 ? LOCK : '');
-    tb.className = 'pts-badge' + (ankiDone && spent > 0 ? ' earned' : spent > 0 ? ' locked' : '');
-    const addRow=document.getElementById(key+'-add-row');
-    const remBadge=document.getElementById(key+'-rem-badge');
-    if(remaining<=0){
-      addRow.style.display='none';
-      document.getElementById('picker-'+key).style.display='none';
-      document.getElementById(key+'-sublabel').textContent='cap reached ('+cap+' pts)';
-    } else {
-      addRow.style.display='flex';
-      remBadge.textContent='up to +'+Math.min(Math.max(...Object.values(opts)),remaining)+' pts';
-      document.getElementById(key+'-sublabel').textContent='cap: '+cap+' pts/day';
+    else if(bucket.type==='weekly'){
+      for(const opt of visibleOpts){
+        const done=!!state.checked[opt.id],locked=!ankiDone;
+        html+='<div class="card"><div class="activity-row" onclick="toggleCheck(\''+opt.id+'\')">';
+        html+='<div class="check'+(done?' done':'')+'"></div>';
+        html+='<div class="activity-info"><div class="activity-name">'+opt.name+'</div></div>';
+        const bp='+'+opt.pts+' pts';
+        if(done&&!locked)html+='<div class="pts-badge earned">'+bp+'</div>';
+        else if(locked)html+='<div class="pts-badge locked">'+bp+LOCK+'</div>';
+        else html+='<div class="pts-badge">'+bp+'</div>';
+        html+='</div></div>';
+      }
     }
-    Object.entries(opts).forEach(([id,bp])=>{
-      const el=document.getElementById('popt-'+key+'-'+id);
-      const pe=document.getElementById('ppts-'+key+'-'+id);
-      if(!el)return;
-      const actual=Math.min(bp,remaining);
-      el.className='picker-option'+(remaining<=0||actual<=0?' disabled':'');
-      if(pe)pe.textContent=actual<=0?'0 pts':actual+(actual<bp?' pts (capped)':' pts');
-    });
-  });
+    else if(bucket.type==='multi'){
+      const cap=bucketCap(bucket),entries=state.entries[bucket.id]||[],spent=entrySum(bucket.id),rem=cap-spent,isOpen=!!openPickers[bucket.id];
+      html+='<div class="card">';
+      // Header
+      html+='<div class="activity-name-plain"><div class="check-spacer"></div><div class="activity-info"><div class="activity-name">'+bucket.label+'</div>';
+      html+='<div class="activity-sub">'+(rem<=0?'cap reached ('+cap+' pts)':'cap: '+cap+' pts/day')+'</div></div>';
+      const tbCls=ankiDone&&spent>0?'pts-badge earned':(spent>0?'pts-badge locked':'pts-badge');
+      const tbTxt=spent+' pts'+(!ankiDone&&spent>0?LOCK:'');
+      html+='<div class="'+tbCls+'" style="'+(spent>0?'':'visibility:hidden')+'">'+tbTxt+'</div></div>';
+      // Entries
+      for(let ei=0;ei<entries.length;ei++){
+        const e=entries[ei],pc=ankiDone?'entry-pts':'entry-pts locked',pt='+'+e.pts+' pts'+(!ankiDone?LOCK:'');
+        html+='<div class="entry-row"><div class="entry-dot"></div><span class="entry-name">'+e.name+'</span><span class="'+pc+'">'+pt+'</span><span class="entry-remove" onclick="removeEntry(\''+bucket.id+'\','+ei+')">×</span></div>';
+      }
+      // Add row
+      if(rem>0){
+        const mx=Math.max(...visibleOpts.map(o=>o.pts));
+        html+='<div class="add-row" onclick="togglePicker(\''+bucket.id+'\')"><div class="add-icon">+</div><span class="add-label">Add activity</span><span class="pts-badge">up to +'+Math.min(mx,rem)+' pts</span></div>';
+      }
+      // Picker
+      if(isOpen&&rem>0){
+        html+='<div class="picker-panel">';
+        for(const opt of visibleOpts){
+          const actual=Math.min(opt.pts,rem),dis=actual<=0;
+          html+='<div class="picker-option'+(dis?' disabled':'')+'" onclick="addEntry(\''+bucket.id+'\',\''+opt.id+'\','+opt.pts+',\''+opt.name.replace(/'/g,"\\'")+'\')">';
+          html+='<span class="picker-opt-name">'+opt.name+'</span>';
+          html+='<span class="picker-opt-pts">'+(dis?'0 pts':actual+(actual<opt.pts?' pts (capped)':' pts'))+'</span></div>';
+        }
+        html+='</div>';
+      }
+      html+='</div>';
+    }
+  }
+  container.innerHTML=html;
 
-  // Fire level-up overlay if pending
-  if (pendingLevelUp !== null) {
-    const lvlUp = pendingLevelUp;
-    pendingLevelUp = null;
-    const pl = document.getElementById('pl');
-    pl.classList.remove('pulse');
-    void pl.offsetWidth; // reflow to restart animation
-    pl.classList.add('pulse');
-    setTimeout(() => window.openLvlOverlay(lvlUp, true), 600);
+  // Level-up overlay
+  if(pendingLevelUp!==null){
+    const lu=pendingLevelUp;pendingLevelUp=null;
+    const pl=document.getElementById('pl');pl.classList.remove('pulse');void pl.offsetWidth;pl.classList.add('pulse');
+    setTimeout(()=>window.openLvlOverlay(lu,true),600);
   }
 }
 </script>

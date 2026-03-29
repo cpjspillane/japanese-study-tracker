@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="日本語">
 <meta name="theme-color" content="#1D9E75">
-<link rel="manifest" href="/japanese-study-tracker/manifest.json">
-<link rel="apple-touch-icon" href="/japanese-study-tracker/icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>日本語 Study Tracker</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -347,7 +347,7 @@ const stateRef = ref(db, 'tracker/state');
 
 // ─── LEVELS ───
 const LEVELS=[
-  {title:'バカ外人',sub:'Stupid Foreigner',pts:0},{title:'外人',sub:'Foreigner',pts:20},{title:'観光客',sub:'Tourist',pts:42},{title:'迷子',sub:'Lost Child',pts:66},{title:'グーグルマップ',sub:'Google Maps',pts:93},{title:'すみません',sub:'Excuse Me',pts:122},{title:'お箸挑戦者',sub:'Chopstick Challenger',pts:154},{title:'コンビニ常連',sub:'Convenience Store Regular',pts:189},{title:'銭湯ビギナー',sub:'Public Bath Beginner',pts:228},{title:'外国人',sub:'Foreign National',pts:271},{title:'日本語上手ですね',sub:'Your Japanese Is So Good!',pts:318},
+  {title:'バカ外人',sub:'Stupid Foreigner',pts:0},{title:'新参者',sub:'Newcomer',pts:20},{title:'通勤地獄',sub:'Commuter Hell',pts:42},{title:'観光客',sub:'Tourist',pts:66},{title:'お客さん',sub:'Customer',pts:93},{title:'新幹線',sub:'Shinkansen',pts:122},{title:'一杯',sub:'One Bowl',pts:154},{title:'コンビニ常連',sub:'Convenience Store Regular',pts:189},{title:'旅館の夕食',sub:'Ryokan Dinner',pts:228},{title:'道案内',sub:'Asking Directions',pts:271},{title:'日本語上手ですね',sub:'Your Japanese Is So Good!',pts:318},
   {title:'デュオリンゴ',sub:'Duolingo',pts:370},{title:'平仮名',sub:'Hiragana',pts:427},{title:'片仮名',sub:'Katakana',pts:490},{title:'源氏教科書',sub:'Genki Textbook',pts:559},{title:'アンキ職人',sub:'Anki Craftsman',pts:635},{title:'て形の壁',sub:'The て-form Wall',pts:719},{title:'漢字の海',sub:'Sea of Kanji',pts:811},{title:'会話の先生',sub:'Conversation Tutor',pts:912},{title:'初めての会話',sub:'First Real Conversation',pts:1023},{title:'JLPT試験',sub:'JLPT Exam',pts:1145},
   {title:'アンチ',sub:'Hater',pts:1280},{title:'にわかファン',sub:'Casual Fan',pts:1428},{title:'オタク',sub:'Otaku',pts:1591},{title:'推し活',sub:'Devoted Stan',pts:1770},{title:'異世界転生',sub:'Isekai Reincarnation',pts:1967},{title:'名無し',sub:'The Nameless One',pts:2184},{title:'見習い',sub:'Apprentice',pts:2422},{title:'仲間集め',sub:'Assembling the Crew',pts:2684},{title:'抜刀',sub:'Drawing the Sword',pts:2972},{title:'主人公',sub:'Main Character',pts:3289},
   {title:'足軽',sub:'Foot Soldier',pts:3638},{title:'間者',sub:'Scout',pts:4022},{title:'武士',sub:'Warrior',pts:4444},{title:'侍',sub:'Samurai',pts:4909},{title:'浪人',sub:'Rōnin',pts:5420},{title:'剣士',sub:'Swordsman',pts:5982},{title:'剣豪',sub:'Sword Master',pts:6600},{title:'大将',sub:'General',pts:7280},{title:'老中',sub:'Senior Councillor',pts:8028},{title:'将軍',sub:'Shogun',pts:8851},
@@ -552,7 +552,7 @@ window.startEditBar=function(dk,sx,sy,cv){
 };
 
 // ─── LEVEL ART ───
-function levelImagePath(l){return'/japanese-study-tracker/images/lvl-'+String(l).padStart(2,'0')+'.png';}
+function levelImagePath(l){return'images/lvl-'+String(l).padStart(2,'0')+'.png';}
 function showPlaceholder(w,t){w.innerHTML='<div class="lvl-placeholder"><div class="lvl-placeholder-text">'+t+'</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';}
 window.openLvlOverlay=function(l,up){
   const d=LEVELS[l],w=document.getElementById('lvl-img-wrap'),img=new Image();

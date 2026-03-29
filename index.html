@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="日本語">
 <meta name="theme-color" content="#1D9E75">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="/japanese-study-tracker/manifest.json">
+<link rel="apple-touch-icon" href="/japanese-study-tracker/icons/apple-touch-icon.png">
 <title>日本語 Study Tracker</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -552,7 +552,7 @@ window.startEditBar=function(dk,sx,sy,cv){
 };
 
 // ─── LEVEL ART ───
-function levelImagePath(l){return'images/lvl-'+String(l).padStart(2,'0')+'.png';}
+function levelImagePath(l){return'/japanese-study-tracker/images/lvl-'+String(l).padStart(2,'0')+'.png';}
 function showPlaceholder(w,t){w.innerHTML='<div class="lvl-placeholder"><div class="lvl-placeholder-text">'+t+'</div><div class="lvl-placeholder-msg">🎨 Our artists are hard at work on this one — check back later!</div></div>';}
 window.openLvlOverlay=function(l,up){
   const d=LEVELS[l],w=document.getElementById('lvl-img-wrap'),img=new Image();
